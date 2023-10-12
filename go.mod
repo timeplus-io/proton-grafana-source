@@ -1,4 +1,4 @@
-module grafana-proton-datasource
+module timeplus-proton-datasource
 
 go 1.19
 

@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"time"
 
-	"grafana-proton-datasource/pkg/parser"
-	"grafana-proton-datasource/pkg/proton"
+	"timeplus-proton-datasource/pkg/parser"
+	"timeplus-proton-datasource/pkg/proton"
 
 	"github.com/google/uuid"
 	"github.com/grafana/grafana-plugin-sdk-go/backend"

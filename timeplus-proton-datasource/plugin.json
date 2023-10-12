@@ -2,7 +2,7 @@
   "$schema": "https://raw.githubusercontent.com/grafana/grafana/master/docs/sources/developers/plugins/plugin.schema.json",
   "type": "datasource",
   "name": "Proton",
-  "id": "grafana-proton-datasource",
+  "id": "timeplus-proton-datasource",
   "metrics": true,
   "backend": true,
   "streaming": true,

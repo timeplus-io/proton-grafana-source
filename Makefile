@@ -1,4 +1,4 @@
-ID = grafana-proton-datasource
+ID = timeplus-proton-datasource
 Version = 1.0.0
 
 init:
