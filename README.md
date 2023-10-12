@@ -25,7 +25,7 @@ There are unbounded streaming query and bounded historical query in proton, all 
 
 For streaming query, check the option `Streaming query` in your query editor.
 
-![query editor](./img/query.png)
+![query editor](src/img/query.png)
 
 
 ## Development
