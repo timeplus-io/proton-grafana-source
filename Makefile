@@ -1,5 +1,5 @@
 ID = timeplus-proton-datasource
-Version = 1.0.0
+Version = 1.0.2
 
 init:
 	npm install
@@ -8,7 +8,7 @@ dev:
 	npm run dev
 
 build:
-	mage -v build:linux
+	mage -v
 
 package:
 	mv dist/ $(ID)

@@ -21,7 +21,7 @@ There are unbounded streaming query and bounded historical query in proton, all 
 
 For streaming query, check the option `Streaming query` in your query editor.
 
-![query editor](./img/query.png)
+![query editor](https://github.com/timeplus-io/proton-grafana-source/blob/f13acc13a4bcd95f1fe6810c48550e67cb3b5704/src/img/query.png)
  
 ## Documentation
 
