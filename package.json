@@ -1,7 +1,7 @@
 {
-  "name": "timeplus-proton",
-  "version": "1.0.0",
-  "description": "Connect proton streaming query",
+  "name": "timeplus-proton-datasource",
+  "version": "1.0.1",
+  "description": "Grafana data source plugin to connect to Proton and visualize streaming or batch queries.",
   "scripts": {
     "build": "webpack -c ./.config/webpack/webpack.config.ts --env production",
     "dev": "webpack -w -c ./.config/webpack/webpack.config.ts --env development",
@@ -15,7 +15,7 @@
     "server": "docker-compose up --build",
     "sign": "npx --yes @grafana/sign-plugin@latest"
   },
-  "author": "Timeplus",
+  "author": "Timeplus Inc.",
   "license": "Apache-2.0",
   "devDependencies": {
     "@babel/core": "^7.21.4",
