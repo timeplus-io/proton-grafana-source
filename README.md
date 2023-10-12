@@ -6,24 +6,24 @@ Grafana data source plugin to connect to Proton and visualize streaming or batch
 [Proton](https://github.com/timeplus-io/proton) is a unified streaming and historical data processing engine in a single binary. It helps data engineers and platform engineers solve complex real-time analytics use cases, and powers the Timeplus streaming analytics platform.
 
 ## Requirements
+
 Grafana v10.0.3 or above
+
 https://github.com/timeplus-io/proton
 
 ## Getting Started
 
-To create a proton data source, 
+Before the plugin is approved by Grafana, you need to set your Grafana running in development mode via changing /usr/local/etc/grafana/grafana.ini, setting `app_mode = development`
 
-1. click `add datasource`
-2. search `proton`
-3. chose `Timeplus Proton`
-4. input your proton `host` default to `localhost` and `port` default to `8463`
-5. click `Save and test`
+In the navigation menu, choose Connections -> Add new connection.
 
-Then you should be able to explore this proton data source.
+Search for Proton and accept the default settings (localhost:8463 as proton connection)
 
-There are unbounded streaming query and bounded historical query in proton, all queries like `select * from stream_name` are default to streaming query, and adding table function to the stream name will turn the query into bounded query.
+Create a new dashboard or explore data with this Proton data source.
 
-For streaming query, check the option `Streaming query` in your query editor.
+There are unbounded streaming query and bounded historical query in proton, all queries like `select * from stream_name` are default to streaming query, and adding `table`` function to the stream name will turn the query into bounded query.
+
+By default, the "Streaming Query" toggle is off. If your SQL is a streaming SQL, make sure to turn it on to leverage Grafana's live chart to show the new results.
 
 ![query editor](src/img/query.png)
 
@@ -55,55 +55,55 @@ For streaming query, check the option `Streaming query` in your query editor.
 1. Install dependencies
 
    ```bash
-   npm install
+   yarn install
    ```
 
 2. Build plugin in development mode and run in watch mode
 
    ```bash
-   npm run dev
+   yarn dev
    ```
 
 3. Build plugin in production mode
 
    ```bash
-   npm run build
+   yarn build
    ```
 
 4. Run the tests (using Jest)
 
    ```bash
    # Runs the tests and watches for changes, requires git init first
-   npm run test
+   yarn test
 
    # Exits after running all the tests
-   npm run test:ci
+   yarn test:ci
    ```
 
 5. Spin up a Grafana instance and run the plugin inside it (using Docker)
 
    ```bash
-   npm run server
+   yarn server
    ```
 
 6. Run the E2E tests (using Cypress)
 
    ```bash
    # Spins up a Grafana instance first that we tests against
-   npm run server
+   yarn server
 
    # Starts the tests
-   npm run e2e
+   yarn e2e
    ```
 
 7. Run the linter
 
    ```bash
-   npm run lint
+   yarn lint
 
    # or
 
-   npm run lint:fix
+   yarn lint:fix
    ```
 
 
