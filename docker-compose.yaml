@@ -10,7 +10,7 @@ services:
       - "7587:7587" # TCP Snapshot
       - "9444:9444" # KV port
   grafana:
-    container_name: 'proton-grafana-datasource'
+    container_name: 'timeplus-proton-datasource'
     platform: "linux/amd64"
     build:
       context: ./.config
@@ -20,5 +20,5 @@ services:
     ports:
       - 3000:3000/tcp
     volumes:
-      - ./dist:/var/lib/grafana/plugins/proton-grafana-datasource
+      - ./dist:/var/lib/grafana/plugins/timeplus-proton-datasource
       - ./provisioning:/etc/grafana/provisioning
