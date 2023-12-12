@@ -21,7 +21,7 @@ Search for Proton and accept the default settings (localhost:8463 as proton conn
 
 Create a new dashboard or explore data with this Proton data source.
 
-There are unbounded streaming query and bounded historical query in proton, all queries like `select * from stream_name` are default to streaming query, and adding `table`` function to the stream name will turn the query into bounded query.
+There are unbounded streaming query and bounded historical query in proton, all queries like `select * from stream_name` are default to streaming query, and adding `table` function to the stream name will turn the query into bounded query.
 
 By default, the "Streaming Query" toggle is off. If your SQL is a streaming SQL, make sure to turn it on to leverage Grafana's live chart to show the new results.
 
