@@ -42,8 +42,11 @@ By default, the "Streaming Query" toggle is off. If your SQL is a streaming SQL,
 2. Build backend plugin binaries for Linux, Windows and Darwin:
 
    ```bash
+   brew install mage
    mage -v
    ```
+
+   mage build:linuxARM will fail, which is okay. Only 64bit OS are supported.
 
 3. List all available Mage targets for additional commands:
 
@@ -55,57 +58,20 @@ By default, the "Streaming Query" toggle is off. If your SQL is a streaming SQL,
 1. Install dependencies
 
    ```bash
-   yarn install
+   npm install
    ```
 
-2. Build plugin in development mode and run in watch mode
+2. Build plugin in development mode and run in watch mode (Ctrl+C to stop)
 
    ```bash
-   yarn dev
+   npm run dev
    ```
 
 3. Build plugin in production mode
 
    ```bash
-   yarn build
+   npm run build
    ```
-
-4. Run the tests (using Jest)
-
-   ```bash
-   # Runs the tests and watches for changes, requires git init first
-   yarn test
-
-   # Exits after running all the tests
-   yarn test:ci
-   ```
-
-5. Spin up a Grafana instance and run the plugin inside it (using Docker)
-
-   ```bash
-   yarn server
-   ```
-
-6. Run the E2E tests (using Cypress)
-
-   ```bash
-   # Spins up a Grafana instance first that we tests against
-   yarn server
-
-   # Starts the tests
-   yarn e2e
-   ```
-
-7. Run the linter
-
-   ```bash
-   yarn lint
-
-   # or
-
-   yarn lint:fix
-   ```
-
 
 # Distributing your plugin
 

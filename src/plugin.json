@@ -19,8 +19,8 @@
     },
     "links": [],
     "screenshots": [{"name": "Query Editor","path": "img/query.png"},{"name": "Dashboard","path": "img/dashboard.png"}],
-    "version": "1.0.2",
-    "updated": "2023-10-11"
+    "version": "1.0.3",
+    "updated": "2023-12-14"
   },
   "dependencies": {
     "grafanaDependency": ">=10.0.3",
