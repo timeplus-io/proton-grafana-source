@@ -47,7 +47,7 @@ func NewDatasource(ctx context.Context, s backend.DataSourceInstanceSettings) (i
 		return nil, err
 	}
 	logger := log.NewWithLevel(log.Info)
-	logger.Info("NewProtonDatasource called", "settings", settings)
+	//logger.Info("NewProtonDatasource called", "settings", settings)
 
 	client := proton.NewEngine(*settings)
 
@@ -160,7 +160,7 @@ func (d *ProtonDatasource) query(_ context.Context, pCtx backend.PluginContext, 
 // datasource configuration page which allows users to verify that
 // a datasource is working as expected.
 func (d *ProtonDatasource) CheckHealth(_ context.Context, req *backend.CheckHealthRequest) (*backend.CheckHealthResult, error) {
-	d.logger.Info("CheckHealth called", "request", req)
+	//d.logger.Info("CheckHealth called", "request", req)
 
 	if !d.client.IsConnected() {
 		return &backend.CheckHealthResult{
