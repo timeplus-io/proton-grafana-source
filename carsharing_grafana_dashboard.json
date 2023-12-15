@@ -25,13 +25,16 @@
     {
       "datasource": {
         "type": "timeplus-proton-datasource",
-        "uid": "a982a90b-3eed-4c12-aaa1-d49554b80f86"
+        "uid": "c3148793-961d-4bc7-b311-1479862675e9"
       },
-      "description": "",
       "fieldConfig": {
         "defaults": {
-          "color": {
-            "mode": "thresholds"
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
           },
           "mappings": [],
           "thresholds": {
@@ -46,18 +49,75 @@
                 "value": 80
               }
             ]
-          },
-          "unit": "velocitykmh"
+          }
         },
         "overrides": []
       },
       "gridPos": {
-        "h": 8,
-        "w": 12,
+        "h": 6,
+        "w": 3,
         "x": 0,
         "y": 0
       },
       "id": 1,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true
+      },
+      "pluginVersion": "10.2.2",
+      "targets": [
+        {
+          "addNow": false,
+          "datasource": {
+            "type": "timeplus-proton-datasource",
+            "uid": "c3148793-961d-4bc7-b311-1479862675e9"
+          },
+          "isStreaming": false,
+          "queryText": "select now()",
+          "refId": "A"
+        }
+      ],
+      "title": "select now()",
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "timeplus-proton-datasource",
+        "uid": "c3148793-961d-4bc7-b311-1479862675e9"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 7,
+        "x": 3,
+        "y": 0
+      },
+      "id": 2,
       "options": {
         "colorMode": "value",
         "graphMode": "area",
@@ -79,32 +139,25 @@
           "addNow": false,
           "datasource": {
             "type": "timeplus-proton-datasource",
-            "uid": "a982a90b-3eed-4c12-aaa1-d49554b80f86"
+            "uid": "c3148793-961d-4bc7-b311-1479862675e9"
           },
-          "isStreaming": true,
-          "queryText": "SELECT avg(speed_kmh) FROM car_live_data",
+          "isStreaming": false,
+          "queryText": "select count() from table(car_live_data)",
           "refId": "A"
         }
       ],
-      "title": "Avg speed",
+      "title": "select count() from table(car_live_data)",
       "type": "stat"
     },
     {
       "datasource": {
         "type": "timeplus-proton-datasource",
-        "uid": "a982a90b-3eed-4c12-aaa1-d49554b80f86"
+        "uid": "c3148793-961d-4bc7-b311-1479862675e9"
       },
       "fieldConfig": {
         "defaults": {
           "color": {
             "mode": "thresholds"
-          },
-          "custom": {
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            }
           },
           "mappings": [],
           "thresholds": {
@@ -113,10 +166,6 @@
               {
                 "color": "green",
                 "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
               }
             ]
           }
@@ -124,76 +173,26 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
+        "h": 6,
+        "w": 14,
+        "x": 10,
         "y": 0
       },
-      "id": 2,
+      "id": 3,
       "options": {
-        "controls": {
-          "mouseWheelZoom": true,
-          "showAttribution": true,
-          "showDebug": false,
-          "showMeasure": false,
-          "showScale": false,
-          "showZoom": true
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
         },
-        "layers": [
-          {
-            "config": {
-              "showLegend": true,
-              "style": {
-                "color": {
-                  "fixed": "dark-green"
-                },
-                "opacity": 0.4,
-                "rotation": {
-                  "fixed": 0,
-                  "max": 360,
-                  "min": -360,
-                  "mode": "mod"
-                },
-                "size": {
-                  "fixed": 5,
-                  "max": 15,
-                  "min": 2
-                },
-                "symbol": {
-                  "fixed": "img/icons/marker/circle.svg",
-                  "mode": "fixed"
-                },
-                "symbolAlign": {
-                  "horizontal": "center",
-                  "vertical": "center"
-                },
-                "textConfig": {
-                  "fontSize": 12,
-                  "offsetX": 0,
-                  "offsetY": 0,
-                  "textAlign": "center",
-                  "textBaseline": "middle"
-                }
-              }
-            },
-            "location": {
-              "mode": "auto"
-            },
-            "name": "Layer 1",
-            "tooltip": true,
-            "type": "markers"
-          }
-        ],
-        "tooltip": {
-          "mode": "details"
-        },
-        "view": {
-          "allLayers": true,
-          "id": "coords",
-          "lat": 40.687602,
-          "lon": -73.849021,
-          "zoom": 10.29
-        }
+        "textMode": "auto",
+        "wideLayout": true
       },
       "pluginVersion": "10.2.2",
       "targets": [
@@ -201,15 +200,15 @@
           "addNow": false,
           "datasource": {
             "type": "timeplus-proton-datasource",
-            "uid": "a982a90b-3eed-4c12-aaa1-d49554b80f86"
+            "uid": "c3148793-961d-4bc7-b311-1479862675e9"
           },
           "isStreaming": true,
-          "queryText": "SELECT * FROM car_live_data",
+          "queryText": "select count() from car_live_data where _tp_time>earliest_ts()",
           "refId": "A"
         }
       ],
-      "title": "Car location",
-      "type": "geomap"
+      "title": "select count() from car_live_data where _tp_time>earliest_ts()",
+      "type": "stat"
     }
   ],
   "refresh": "",
@@ -224,8 +223,8 @@
   },
   "timepicker": {},
   "timezone": "",
-  "title": "Carsharing Dashboard",
-  "uid": "b2038739-69a4-4c11-9ebb-6908d4b7c5a2",
+  "title": "Carsharing Demo Dashboard",
+  "uid": "dd9e271d-7225-47d4-9e57-62133db0df62",
   "version": 2,
   "weekStart": ""
 }

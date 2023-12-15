@@ -13,6 +13,14 @@ https://github.com/timeplus-io/proton
 
 ## Getting Started
 
+### Use the pre-built Docker Compose
+The [docker-compose.yaml](docker-compose.yaml) in this folder ships a Grafana container, with the proton plugin pre-installed, as well as a data generator.
+
+You start it with `docker compose up` and go to http://localhost:3000 to add a new data source for Proton, using `proton` as the hostname.
+Then create a new dashboard by copying the content of [carsharing_grafana_dashboard.json](carsharing_grafana_dashboard.json) in the dashboard JSON model.
+
+### Use your own Grafana deployment
+
 Before the plugin is approved by Grafana, you need to set your Grafana running in development mode via changing /usr/local/etc/grafana/grafana.ini, setting `app_mode = development`
 
 In the navigation menu, choose Connections -> Add new connection.

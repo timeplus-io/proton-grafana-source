@@ -13,6 +13,7 @@ build:
 package:
 	mv dist/ $(ID)
 	zip $(ID)-$(Version).zip $(ID) -r
+	mv $(ID) dist/
 
 validate:
 	npx -y @grafana/plugin-validator@latest ./$(ID)-$(Version).zip
