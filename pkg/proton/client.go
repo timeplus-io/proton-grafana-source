@@ -72,7 +72,7 @@ func (e *ProtonEngine) StopQuery(id string) {
 		if _, err := e.connection.Exec("kill query where query_id=@id", sql.Named("id", id)); err != nil {
 			log.DefaultLogger.Error("failed to kill query", "queryID", id, "err", err)
 		}
-		log.DefaultLogger.Info("query stopped", "queryID", id)
+		// log.DefaultLogger.Info("query stopped", "queryID", id)
 	}
 }
 
@@ -216,5 +216,5 @@ func (e *ProtonEngine) Unsubscribe(t string) {
 
 func (e *ProtonEngine) Dispose() {
 	//this needs to be verified, never called
-	log.DefaultLogger.Info("Client.Dispose")
+	// log.DefaultLogger.Info("Client.Dispose")
 }

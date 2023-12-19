@@ -60,7 +60,7 @@ func NewDatasource(ctx context.Context, s backend.DataSourceInstanceSettings) (i
 // created. As soon as datasource settings change detected by SDK old datasource instance will
 // be disposed and a new one will be created using NewSampleDatasource factory function.
 func (d *ProtonDatasource) Dispose() {
-	d.logger.Info("[plugin.go] Dispose called")
+	// d.logger.Info("[plugin.go] Dispose called")
 	// Clean up datasource instance resources.
 	d.client.Dispose()
 }
@@ -102,12 +102,12 @@ func (d *ProtonDatasource) query(_ context.Context, pCtx backend.PluginContext, 
 	}
 	//qm.Query can be null or empty String. Need to skip query to avoid error
 	if qm.Query == "" {
-		d.logger.Info("[plugin.go] skip running the empty query")
+		// d.logger.Info("[plugin.go] skip running the empty query")
 		return response
 	}
 	// Generate an UUID for the proton query
 	id := uuid.Must(uuid.NewRandom()).String()
-	d.logger.Info("[plugin.go] query with", "SQL", qm.Query, "QueryID", id, "RefID", query.RefID)
+	// d.logger.Info("[plugin.go] query with", "SQL", qm.Query, "QueryID", id, "RefID", query.RefID)
 
 	rows, err := d.client.RunQuery(qm.Query, id, qm.IsStreaming, qm.AddNow)
 	if err != nil {
@@ -179,7 +179,7 @@ func (d *ProtonDatasource) CheckHealth(_ context.Context, req *backend.CheckHeal
 }
 
 func (d *ProtonDatasource) SubscribeStream(ctx context.Context, req *backend.SubscribeStreamRequest) (*backend.SubscribeStreamResponse, error) {
-	d.logger.Info("SubscribeStream %v", req)
+	// d.logger.Info("SubscribeStream %v", req)
 
 	return &backend.SubscribeStreamResponse{
 		Status: backend.SubscribeStreamStatusOK,
@@ -187,7 +187,7 @@ func (d *ProtonDatasource) SubscribeStream(ctx context.Context, req *backend.Sub
 }
 
 func (d *ProtonDatasource) PublishStream(ctx context.Context, req *backend.PublishStreamRequest) (*backend.PublishStreamResponse, error) {
-	d.logger.Info("PublishStream called", "request", req)
+	// d.logger.Info("PublishStream called", "request", req)
 
 	// Do not allow publishing at all.
 	return &backend.PublishStreamResponse{
@@ -203,7 +203,7 @@ func (d *ProtonDatasource) RunStream(ctx context.Context, req *backend.RunStream
 		select {
 		case <-ctx.Done():
 			//TODO, sometimes the 2nd streaming chart will get cancelled somehow
-			d.logger.Info("[plugin.go] Context canceled, finish streaming", "path", req.Path)
+			// d.logger.Info("[plugin.go] Context canceled, finish streaming", "path", req.Path)
 			d.client.StopQuery(req.Path)
 			return nil
 		case item := <-state.Stream:
