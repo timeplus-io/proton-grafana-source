@@ -26,7 +26,7 @@ export class ConfigEditor extends PureComponent<Props, State> {
       port: parseInt(event.target.value, 10),
     };
     onOptionsChange({ ...options, jsonData });
-    console.log("change data " + JSON.stringify(jsonData));
+    //console.log("change data " + JSON.stringify(jsonData));
   };
 
   render() {
