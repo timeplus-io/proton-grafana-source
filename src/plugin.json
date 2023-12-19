@@ -6,6 +6,7 @@
   "metrics": true,
   "backend": true,
   "streaming": true,
+  "alerting": true,
   "executable": "gpx_timeplus_proton",
   "info": {
     "description": "Proton is a unified streaming and historical data processing engine in a single binary. It helps data engineers and platform engineers solve complex real-time analytics use cases, and powers the Timeplus streaming analytics platform.",
