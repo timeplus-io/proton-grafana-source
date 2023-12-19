@@ -14,8 +14,8 @@
     },
     "keywords": ["datasource"],
     "logos": {
-      "small": "img/timeplus.png",
-      "large": "img/timeplus.png"
+      "small": "img/timeplus.svg",
+      "large": "img/timeplus.svg"
     },
     "links": [],
     "screenshots": [{"name": "Query Editor","path": "img/query.png"},{"name": "Dashboard","path": "img/dashboard.png"}],
