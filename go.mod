@@ -8,7 +8,7 @@ require (
 	github.com/google/uuid v1.3.1
 	github.com/grafana/grafana-plugin-sdk-go v0.178.0
 	github.com/reactivex/rxgo/v2 v2.5.0
-	github.com/timeplus-io/proton-go-driver/v2 v2.0.15
+	github.com/timeplus-io/proton-go-driver/v2 v2.0.17
 )
 
 require (
