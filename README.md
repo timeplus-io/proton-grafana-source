@@ -9,7 +9,7 @@ Grafana data source plugin to connect to Proton and visualize streaming or batch
 
 Grafana v10.0.3 or above
 
-https://github.com/timeplus-io/proton
+A running Proton instance with TCP port 8463 (for database connection) and HTTP port 3218 (for query analazyer REST API).
 
 ## Getting Started
 
