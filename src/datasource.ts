@@ -8,6 +8,13 @@ export class DataSource extends DataSourceWithBackend<TpQuery, TpDataSourceOptio
     super(instanceSettings);
   }
 
+  filterQuery(query: TpQuery): boolean {
+    if (query.hide || query.queryText === '') {
+      return false;
+    }
+    return true;
+  }
+
   getDefaultQuery(_: CoreApp): Partial<TpQuery> {
     return defaultQuery
   }
