@@ -11,7 +11,7 @@ export class DataSource extends DataSourceWithBackend<TpQuery, TpDataSourceOptio
   applyTemplateVariables(query: TpQuery, scopedVars: ScopedVars): Record<string, any> {
     return {
       ...query,
-      rawQuery: getTemplateSrv().replace(query.queryText, scopedVars),
+      queryText: getTemplateSrv().replace(query.queryText, scopedVars),
     };
   }
 
