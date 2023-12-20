@@ -1,11 +1,18 @@
-import { DataSourceInstanceSettings, CoreApp } from '@grafana/data';
-import { DataSourceWithBackend } from '@grafana/runtime';
+import { DataSourceInstanceSettings, CoreApp, ScopedVars } from '@grafana/data';
+import { DataSourceWithBackend, getTemplateSrv } from '@grafana/runtime';
 
 import { TpQuery, TpDataSourceOptions, defaultQuery } from './types';
 
 export class DataSource extends DataSourceWithBackend<TpQuery, TpDataSourceOptions> {
   constructor(instanceSettings: DataSourceInstanceSettings<TpDataSourceOptions>) {
     super(instanceSettings);
+  }
+
+  applyTemplateVariables(query: TpQuery, scopedVars: ScopedVars): Record<string, any> {
+    return {
+      ...query,
+      rawQuery: getTemplateSrv().replace(query.queryText, scopedVars),
+    };
   }
 
   filterQuery(query: TpQuery): boolean {
