@@ -60,7 +60,7 @@ func NewDatasource(ctx context.Context, s backend.DataSourceInstanceSettings) (i
 // created. As soon as datasource settings change detected by SDK old datasource instance will
 // be disposed and a new one will be created using NewSampleDatasource factory function.
 func (d *ProtonDatasource) Dispose() {
-	// d.logger.Info("[plugin.go] Dispose called")
+	// d.logger.Info("[datasource.go] Dispose called")
 	// Clean up datasource instance resources.
 	d.client.Dispose()
 }
@@ -86,7 +86,6 @@ func (d *ProtonDatasource) QueryData(ctx context.Context, req *backend.QueryData
 
 type queryModel struct {
 	AddNow      bool   `json:"addNow"`
-	IsStreaming bool   `json:"isStreaming"`
 	Query       string `json:"queryText"`
 }
 
@@ -102,17 +101,20 @@ func (d *ProtonDatasource) query(_ context.Context, pCtx backend.PluginContext, 
 	}
 	//qm.Query can be null or empty String. Need to skip query to avoid error
 	if qm.Query == "" {
-		// d.logger.Info("[plugin.go] skip running the empty query")
+		// d.logger.Info("[datasource.go] skip running the empty query")
 		return response
 	}
+	// Jove TODO: call Proton query analayzer API to figure out whether it's streaming query or not.
+	IsStreaming := d.client.IsStreamingQuery(qm.Query)
+	
 	// Generate an UUID for the proton query
 	id := uuid.Must(uuid.NewRandom()).String()
-	// d.logger.Info("[plugin.go] query with", "SQL", qm.Query, "QueryID", id, "RefID", query.RefID)
+	// d.logger.Info("[datasource.go] query with", "SQL", qm.Query, "QueryID", id, "RefID", query.RefID)
 
-	rows, err := d.client.RunQuery(qm.Query, id, qm.IsStreaming, qm.AddNow)
+	rows, err := d.client.RunQuery(qm.Query, id, IsStreaming, qm.AddNow)
 	if err != nil {
 		response.Error = err
-		d.logger.Error("[plugin.go] client.RunQuery failed. Cannot submit the query.", "error", err)
+		d.logger.Error("[datasource.go] client.RunQuery failed. Cannot submit the query.", "error", err)
 		return response
 	}
 
@@ -129,7 +131,7 @@ func (d *ProtonDatasource) query(_ context.Context, pCtx backend.PluginContext, 
 		frame.Fields = append(frame.Fields, parser.NewDataFieldByType(c.Name, c.Type))
 	}
 
-	if qm.IsStreaming {
+	if IsStreaming {
 		// to subscribe on a client-side and consume updates from a plugin.
 		channel := live.Channel{
 			Scope:     live.ScopeDatasource,
@@ -203,7 +205,7 @@ func (d *ProtonDatasource) RunStream(ctx context.Context, req *backend.RunStream
 		select {
 		case <-ctx.Done():
 			//TODO, sometimes the 2nd streaming chart will get cancelled somehow
-			// d.logger.Info("[plugin.go] Context canceled, finish streaming", "path", req.Path)
+			// d.logger.Info("[datasource.go] Context canceled, finish streaming", "path", req.Path)
 			d.client.StopQuery(req.Path)
 			return nil
 		case item := <-state.Stream:

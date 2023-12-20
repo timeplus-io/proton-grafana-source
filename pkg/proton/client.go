@@ -5,6 +5,10 @@ import (
 	"database/sql"
 	"fmt"
 	"strconv"
+	"bytes"
+	"encoding/json"
+	"io/ioutil"
+	"net/http"
 
 	"github.com/grafana/grafana-plugin-sdk-go/backend/log"
 	"github.com/reactivex/rxgo/v2"
@@ -14,6 +18,7 @@ import (
 type Options struct {
 	Host string `json:"host"`
 	Port uint16 `json:"port"`
+	Port2 uint16 `json:"port2"`
 }
 
 type Column struct {
@@ -42,6 +47,10 @@ func NewEngine(config Options) *ProtonEngine {
 
 	if config.Port == 0 {
 		config.Port = 8463
+	}
+
+	if config.Port2 == 0 {
+		config.Port2 = 3218
 	}
 
 	db := ProtonEngine{
@@ -87,6 +96,49 @@ func (e *ProtonEngine) IsConnected() bool {
 
 func (e *ProtonEngine) GetQueryState(id string) ProtonQueryState {
 	return *e.runningQueries[id]
+}
+
+func (e *ProtonEngine) IsStreamingQuery(query string) bool {
+	url := fmt.Sprintf("http://%s:%d/proton/v1/sqlanalyzer", e.Options.Host, e.Options.Port2)
+	queryMap := map[string]string{"query": query}
+	jsonData, err := json.Marshal(queryMap)
+	if err != nil {
+		log.DefaultLogger.Error("Error encoding JSON:", err)
+		return false
+	}
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+	if err != nil {
+		log.DefaultLogger.Error("Error creating request:", err)
+		return false
+	}
+	req.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		log.DefaultLogger.Error("Error sending request:", err)
+		return false
+	}
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.DefaultLogger.Error("Error reading response:", err)
+		return false
+	}
+	var response map[string]interface{}
+	err = json.Unmarshal(body, &response)
+	if err != nil {
+		log.DefaultLogger.Error("Error decoding JSON response:", err)
+		return false
+	}
+	isStreaming, ok := response["is_streaming"].(bool)
+	if !ok {
+		log.DefaultLogger.Error("Error: is_streaming is not a boolean value", err)
+		return false
+	}
+	log.DefaultLogger.Debug("Exit IsStreamingQuery ",isStreaming)
+	return isStreaming
 }
 
 func (e *ProtonEngine) RunQuery(sql string, id string, isStreaming bool, addNow bool) ([][]interface{}, error) {

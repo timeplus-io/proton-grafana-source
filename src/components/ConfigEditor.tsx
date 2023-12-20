@@ -26,7 +26,15 @@ export class ConfigEditor extends PureComponent<Props, State> {
       port: parseInt(event.target.value, 10),
     };
     onOptionsChange({ ...options, jsonData });
-    //console.log("change data " + JSON.stringify(jsonData));
+  };
+
+  onPortRESTChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const { onOptionsChange, options } = this.props;
+    const jsonData = {
+      ...options.jsonData,
+      port2: parseInt(event.target.value, 10),
+    };
+    onOptionsChange({ ...options, jsonData });
   };
 
   render() {
@@ -42,19 +50,29 @@ export class ConfigEditor extends PureComponent<Props, State> {
             inputWidth={20}
             onChange={this.onHostChange}
             value={jsonData.host || 'localhost'}
-            placeholder="Timeplus host"
+            placeholder="Proton host"
           />
         </div>
         <div className="gf-form">
           <FormField
-            label="Port"
+            label="TCP Port"
             labelWidth={6}
             inputWidth={20}
             onChange={this.onPortChange}
             value={jsonData.port || 8463}
-            placeholder="8000"
+            placeholder="8463"
           />
         </div>
+        <div className="gf-form">
+          <FormField
+            label="REST Port"
+            labelWidth={6}
+            inputWidth={20}
+            onChange={this.onPortRESTChange}
+            value={jsonData.port2 || 3218}
+            placeholder="3218"
+          />
+        </div>        
       </div>
     );
   }

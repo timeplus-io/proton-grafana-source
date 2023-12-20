@@ -20,12 +20,6 @@ export class QueryEditor extends PureComponent<Props, State> {
     //onRunQuery();
   };
 
-  onIsStreamingChange = (event: SyntheticEvent<HTMLInputElement>) => {
-    const { onChange, query } = this.props;
-    onChange({ ...query, isStreaming: event.currentTarget.checked });
-    //onRunQuery();
-  };
-
   onQueryTextChange = (value: string) => {
     const { onChange, query } = this.props;
     onChange({ ...query, queryText: value });
@@ -34,7 +28,7 @@ export class QueryEditor extends PureComponent<Props, State> {
 
   render() {
     const query = defaults(this.props.query, defaultQuery);
-    const { queryText, addNow, isStreaming } = query;
+    const { queryText, addNow } = query;
 
     return (
       <div className="gf-form-group">
@@ -50,7 +44,6 @@ export class QueryEditor extends PureComponent<Props, State> {
           />
         </div>
         <div className="gf-form">
-          <Switch checked={isStreaming || false} label="Streaming query" onChange={this.onIsStreamingChange} />
           <Switch
             checked={addNow || false}
             label="Add current time as the first column"
