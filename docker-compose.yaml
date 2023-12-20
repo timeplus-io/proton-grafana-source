@@ -16,7 +16,7 @@ services:
       GF_AUTH_ANONYMOUS_ENABLED: 1
       GF_AUTH_ANONYMOUS_ORG_ROLE: Admin
       GF_PLUGINS_ALLOW_LOADING_UNSIGNED_PLUGINS: timeplus-proton-datasource
-      GF_INSTALL_PLUGINS: https://timeplus.io/timeplus-proton-datasource-1.0.3c.zip;timeplus-proton-datasource
+      GF_INSTALL_PLUGINS: https://timeplus.io/timeplus-proton-datasource-1.0.3d.zip;timeplus-proton-datasource
     volumes:
       - ./provisioning:/etc/grafana/provisioning
 
