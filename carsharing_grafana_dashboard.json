@@ -80,7 +80,6 @@
             "type": "timeplus-proton-datasource",
             "uid": "c3148793-961d-4bc7-b311-1479862675e9"
           },
-          "isStreaming": false,
           "queryText": "select now()",
           "refId": "A"
         }
@@ -141,7 +140,6 @@
             "type": "timeplus-proton-datasource",
             "uid": "c3148793-961d-4bc7-b311-1479862675e9"
           },
-          "isStreaming": false,
           "queryText": "select count() from table(car_live_data)",
           "refId": "A"
         }
@@ -202,7 +200,6 @@
             "type": "timeplus-proton-datasource",
             "uid": "c3148793-961d-4bc7-b311-1479862675e9"
           },
-          "isStreaming": true,
           "queryText": "select count() from car_live_data where _tp_time>earliest_ts()",
           "refId": "A"
         }
