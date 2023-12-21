@@ -21,11 +21,9 @@ Then create a new dashboard by copying the content of [carsharing_grafana_dashbo
 
 ### Use your own Grafana deployment
 
-Before the plugin is approved by Grafana, you need to set your Grafana running in development mode via changing /usr/local/etc/grafana/grafana.ini, setting `app_mode = development`
-
 In the navigation menu, choose Connections -> Add new connection.
 
-Search for Proton and accept the default settings (localhost:8463 as proton connection). This plugin is expected to run in localhost or trusted network. Username and password for Proton will be added later. For Timeplus Cloud, API Key is supported for REST API, but this Grafana plugin doesn't support Timeplus Cloud at this point.
+Search for Proton and accept the default settings (localhost,port 8463 and 3218 as proton connection). This plugin is expected to run in localhost or trusted network. Username and password for Proton will be added later. For Timeplus Cloud, API Key is supported for REST API, but this Grafana plugin doesn't support Timeplus Cloud at this point.
 
 Create a new dashboard or explore data with this Proton data source.
 
