@@ -3,7 +3,7 @@ Grafana data source plugin to connect to Proton and visualize streaming or batch
 
 ## Overview / Introduction
 
-[Proton](https://github.com/timeplus-io/proton) is a unified streaming and historical data processing engine in a single binary. It helps data engineers and platform engineers solve complex real-time analytics use cases, and powers the Timeplus streaming analytics platform.
+[Proton](https://github.com/timeplus-io/proton) is a streaming analytics engine in a single binary. It helps data engineers and platform engineers solve complex real-time analytics use cases, and powers the [Timeplus](https://timeplus.com) streaming analytics platform.
 
 ## Requirements
 
@@ -16,8 +16,9 @@ A running Proton instance with TCP port 8463 (for database connection) and HTTP 
 ### Use the pre-built Docker Compose
 The [docker-compose.yaml](docker-compose.yaml) in this folder ships a Grafana container, with the proton plugin pre-installed, as well as a data generator.
 
-You start it with `docker compose up` and go to http://localhost:3000 to add a new data source for Proton, using `proton` as the hostname (because the Grafana container is running in the Docker Compose network. `proton` is the internal hostname for Proton database.)
-Then create a new dashboard by copying the content of [carsharing_grafana_dashboard.json](carsharing_grafana_dashboard.json) in the dashboard JSON model.
+You start it with `docker compose up` and go to http://localhost:3000 to view the Carsharing dashboard.
+
+A data source for Proton is created automatically.
 
 ### Use your own Grafana deployment
 
