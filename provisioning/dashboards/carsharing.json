@@ -18,14 +18,13 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 1,
   "links": [],
   "liveNow": false,
   "panels": [
     {
       "datasource": {
         "type": "timeplus-proton-datasource",
-        "uid": "c3148793-961d-4bc7-b311-1479862675e9"
+        "uid": "c24e0faf-1490-4321-a373-7b2b07ca2e38"
       },
       "fieldConfig": {
         "defaults": {
@@ -72,13 +71,13 @@
         },
         "showHeader": true
       },
-      "pluginVersion": "10.2.2",
+      "pluginVersion": "10.2.3",
       "targets": [
         {
           "addNow": false,
           "datasource": {
             "type": "timeplus-proton-datasource",
-            "uid": "c3148793-961d-4bc7-b311-1479862675e9"
+            "uid": "c24e0faf-1490-4321-a373-7b2b07ca2e38"
           },
           "queryText": "select now()",
           "refId": "A"
@@ -90,7 +89,7 @@
     {
       "datasource": {
         "type": "timeplus-proton-datasource",
-        "uid": "c3148793-961d-4bc7-b311-1479862675e9"
+        "uid": "c24e0faf-1490-4321-a373-7b2b07ca2e38"
       },
       "fieldConfig": {
         "defaults": {
@@ -132,25 +131,25 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "10.2.2",
+      "pluginVersion": "10.2.3",
       "targets": [
         {
           "addNow": false,
           "datasource": {
             "type": "timeplus-proton-datasource",
-            "uid": "c3148793-961d-4bc7-b311-1479862675e9"
+            "uid": "c24e0faf-1490-4321-a373-7b2b07ca2e38"
           },
-          "queryText": "select count() from table(car_live_data)",
+          "queryText": "select count() from car_live_data",
           "refId": "A"
         }
       ],
-      "title": "select count() from table(car_live_data)",
+      "title": "select count() from car_live_data",
       "type": "stat"
     },
     {
       "datasource": {
         "type": "timeplus-proton-datasource",
-        "uid": "c3148793-961d-4bc7-b311-1479862675e9"
+        "uid": "c24e0faf-1490-4321-a373-7b2b07ca2e38"
       },
       "fieldConfig": {
         "defaults": {
@@ -192,13 +191,13 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "10.2.2",
+      "pluginVersion": "10.2.3",
       "targets": [
         {
           "addNow": false,
           "datasource": {
             "type": "timeplus-proton-datasource",
-            "uid": "c3148793-961d-4bc7-b311-1479862675e9"
+            "uid": "c24e0faf-1490-4321-a373-7b2b07ca2e38"
           },
           "queryText": "select count() from car_live_data where _tp_time>earliest_ts()",
           "refId": "A"
@@ -209,7 +208,7 @@
     }
   ],
   "refresh": "",
-  "schemaVersion": 38,
+  "schemaVersion": 39,
   "tags": [],
   "templating": {
     "list": []
@@ -222,6 +221,6 @@
   "timezone": "",
   "title": "Carsharing Demo Dashboard",
   "uid": "dd9e271d-7225-47d4-9e57-62133db0df62",
-  "version": 2,
+  "version": 1,
   "weekStart": ""
 }
