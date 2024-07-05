@@ -1,15 +1,15 @@
-# Proton Grafana Datasource
-Grafana data source plugin to connect to Proton and visualize streaming or batch queries.
+# Timeplus Grafana Datasource
+Grafana data source plugin to connect to Timeplus and visualize streaming or batch queries.
 
 ## Overview / Introduction
 
-[Proton](https://github.com/timeplus-io/proton) is a streaming analytics engine in a single binary. It helps data engineers and platform engineers solve complex real-time analytics use cases, and powers the [Timeplus](https://timeplus.com) streaming analytics platform.
+As the core engine of [Timeplus Enterprise](https://timeplus.com), [Proton](https://github.com/timeplus-io/proton) is a single binary for streaming analytics. It helps data engineers and platform engineers solve complex real-time analytics use cases.
 
 ## Requirements
 
 Grafana v10.0.3 or above
 
-A running Proton instance with TCP port 8463 (for database connection) and HTTP port 3218 (for query analazyer REST API).
+A running Timeplus Proton or Timeplus Enterprise instance with TCP port 8463 (for database connection) and HTTP port 3218 (for query analazyer REST API).
 
 ## Getting Started
 
@@ -18,15 +18,15 @@ The [docker-compose.yaml](docker-compose.yaml) in this folder ships a Grafana co
 
 You start it with `docker compose up` and go to http://localhost:3000 to view the Carsharing dashboard.
 
-A data source for Proton is created automatically.
+A data source for Timeplus is created automatically.
 
 ### Use your own Grafana deployment
 
 In the navigation menu, choose Connections -> Add new connection.
 
-Search for Proton and accept the default settings (localhost,port 8463 and 3218 as proton connection). This plugin is expected to run in localhost or trusted network. Username and password for Proton will be added later. For Timeplus Cloud, API Key is supported for REST API, but this Grafana plugin doesn't support Timeplus Cloud at this point.
+Search for Timeplus and accept the default settings (localhost,port 8463 and 3218 as proton connection). This plugin is expected to run in localhost or trusted network. Username and password for Timeplus will be added later. This tool supports self-hosted Timeplus Enterprise, but not for Timeplus Cloud.
 
-Create a new dashboard or explore data with this Proton data source.
+Create a new dashboard or explore data with this Timeplus data source.
 
 There are unbounded streaming query and bounded historical query in proton, all queries like `select count(*) from stream_name` are streaming queries, and adding `table` function to the stream name will turn the query into bounded query, e.g. `select count(*) from table(stream_name)`.
 
