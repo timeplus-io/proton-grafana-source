@@ -1,4 +1,4 @@
-package parser
+package timeplus
 
 import (
 	"encoding/json"
@@ -129,7 +129,7 @@ func ParseValue(fieldName string, fieldType string, tz *time.Location, value int
 			}
 			return parseInt64Value(value, isNullable)
 		case "bool":
-			return value	
+			return value
 		default:
 			if strings.HasPrefix(fieldType, "decimal") {
 				return parseDecimalValue(value, isNullable)

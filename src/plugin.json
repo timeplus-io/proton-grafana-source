@@ -1,5 +1,5 @@
 {
-  "$schema": "https://raw.githubusercontent.com/grafana/grafana/master/docs/sources/developers/plugins/plugin.schema.json",
+  "$schema": "https://raw.githubusercontent.com/grafana/grafana/main/docs/sources/developers/plugins/plugin.schema.json",
   "type": "datasource",
   "name": "Proton",
   "id": "timeplus-proton-datasource",
@@ -7,7 +7,7 @@
   "backend": true,
   "streaming": true,
   "alerting": true,
-  "executable": "gpx_timeplus_proton",
+  "executable": "gpx_timeplus",
   "info": {
     "description": "Proton is a unified streaming and historical data processing engine in a single binary. It helps data engineers and platform engineers solve complex real-time analytics use cases, and powers the Timeplus streaming analytics platform.",
     "author": {
@@ -24,7 +24,7 @@
     "updated": "2023-12-20"
   },
   "dependencies": {
-    "grafanaDependency": ">=10.0.3",
+    "grafanaDependency": ">=10.4.0",
     "plugins": []
   }
 }

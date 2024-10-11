@@ -6,7 +6,7 @@ Grafana data source plugin to connect to Proton and visualize streaming or batch
 [Proton](https://github.com/timeplus-io/proton) is a unified streaming and historical data processing engine in a single binary. It helps data engineers and platform engineers solve complex real-time analytics use cases, and powers the Timeplus streaming analytics platform.
 
 ## Requirements
-Grafana v10.0.3 or above
+Grafana v10.4.0 or above
 
 A running Proton instance with TCP port 8463 (for database connection) and HTTP port 3218 (for query analazyer REST API).
 
