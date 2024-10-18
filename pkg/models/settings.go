@@ -9,7 +9,8 @@ import (
 
 type PluginSettings struct {
 	Host     string                `json:"host"`
-	Port     int                   `json:"port"`
+	TCPPort  int                   `json:"tcpPort"`
+	HTTPPort int                   `json:"httpPort"`
 	Username string                `json:"username"`
 	Secrets  *SecretPluginSettings `json:"-"`
 }

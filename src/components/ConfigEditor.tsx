@@ -29,16 +29,26 @@ export function ConfigEditor(props: Props) {
     });
   };
 
-  const onPortChange = (event: ChangeEvent<HTMLInputElement>) => {
+  const onTCPPortChange = (event: ChangeEvent<HTMLInputElement>) => {
     onOptionsChange({
       ...options,
       jsonData: {
         ...jsonData,
-        port: parseInt(event.target.value, 10),
+        tcpPort: parseInt(event.target.value, 10) ,
       },
     });
   };
+ 
   
+  const onHTTPPortChange = (event: ChangeEvent<HTMLInputElement>) => {
+    onOptionsChange({
+      ...options,
+      jsonData: {
+        ...jsonData,
+        httpPort: parseInt(event.target.value, 10),
+      },
+    });
+  };
 
   // Secure field (only sent to the backend)
   const onPasswordChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -66,7 +76,7 @@ export function ConfigEditor(props: Props) {
 
   return (
     <>
-      <InlineField label="Host" labelWidth={14} interactive tooltip={'Hostname and port'}>
+      <InlineField label="Host" labelWidth={14} interactive tooltip={'Hostname'}>
         <Input
           id="config-editor-host"
           onChange={onHostChange}
@@ -75,13 +85,25 @@ export function ConfigEditor(props: Props) {
           width={40}
         />
       </InlineField>
-      <InlineField label="Port" labelWidth={14} interactive tooltip={'Port'}>
+      <InlineField label="TCP Port" labelWidth={14} interactive tooltip={'TCP Port'}>
         <Input
-          id="config-editor-port"
+          id="config-editor-tcp-port"
           type='number'
-          onChange={onPortChange}
-          value={jsonData.port}
+          onChange={onTCPPortChange}
+          value={jsonData.tcpPort}
+          defaultValue="8463"
           placeholder="8463"
+          width={40}
+        />
+      </InlineField>
+      <InlineField label="HTTP Port" labelWidth={14} interactive tooltip={'HTTP Port'}>
+        <Input
+          id="config-editor-http-port"
+          type='number'
+          onChange={onHTTPPortChange}
+          value={jsonData.httpPort}
+          defaultValue="3218"
+          placeholder="3218"
           width={40}
         />
       </InlineField>

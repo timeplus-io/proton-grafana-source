@@ -10,7 +10,8 @@ export interface TpQuery extends DataQuery {
  */
 export interface TpDataSourceOptions extends DataSourceJsonData {
   host?: string;
-  port?: number;
+  tcpPort?: number;
+  httpPort?: number;
   username?: string
 }
 

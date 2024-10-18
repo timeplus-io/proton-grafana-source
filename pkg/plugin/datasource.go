@@ -14,18 +14,12 @@ import (
 	"github.com/timeplus-io/proton-grafana-source/pkg/timeplus"
 )
 
-// Make sure Datasource implements required interfaces. This is important to do
-// since otherwise we will only get a not implemented error response from plugin in
-// runtime. In this example datasource instance implements backend.QueryDataHandler,
-// backend.CheckHealthHandler interfaces. Plugin should not implement all these
-// interfaces - only those which are required for a particular task.
 var (
 	_ backend.CheckHealthHandler    = (*Datasource)(nil)
 	_ backend.StreamHandler         = (*Datasource)(nil)
 	_ instancemgmt.InstanceDisposer = (*Datasource)(nil)
 )
 
-// NewDatasource creates a new datasource instance.
 func NewDatasource(ctx context.Context, settings backend.DataSourceInstanceSettings) (instancemgmt.Instance, error) {
 	logger := log.DefaultLogger.FromContext(ctx)
 	conf, err := models.LoadPluginSettings(settings)
@@ -33,9 +27,9 @@ func NewDatasource(ctx context.Context, settings backend.DataSourceInstanceSetti
 		return nil, err
 	}
 
-	engine := timeplus.NewEngine(logger, conf.Host, conf.Port, conf.Username, conf.Secrets.Password)
+	engine := timeplus.NewEngine(logger, conf.Host, conf.TCPPort, conf.HTTPPort, conf.Username, conf.Secrets.Password)
 
-	logger.Debug("new timeplus source")
+	logger.Debug("new timeplus source created")
 
 	return &Datasource{
 		engine:  engine,
@@ -52,7 +46,6 @@ type Datasource struct {
 
 func (d *Datasource) QueryData(ctx context.Context, req *backend.QueryDataRequest) (*backend.QueryDataResponse, error) {
 	logger := log.DefaultLogger.FromContext(ctx)
-	logger.Info("QueryData called")
 	response := backend.NewQueryDataResponse()
 
 	for _, query := range req.Queries {
@@ -93,7 +86,6 @@ func (d *Datasource) QueryData(ctx context.Context, req *backend.QueryDataReques
 			for {
 				select {
 				case <-ctx.Done():
-					logger.Info("RunStream ctx done")
 					return nil, ctx.Err()
 				case row, ok := <-ch:
 					if !ok {
@@ -168,11 +160,10 @@ func (d *Datasource) RunStream(ctx context.Context, req *backend.RunStreamReques
 	for {
 		select {
 		case <-ctx.Done():
-			logger.Info("RunStream ctx done")
 			return ctx.Err()
 		case row, ok := <-ch:
 			if !ok {
-				logger.Info("Query finished")
+				logger.Warn("Streaming query terminated")
 				return nil
 			}
 			frame := data.NewFrame("response")
@@ -188,28 +179,17 @@ func (d *Datasource) RunStream(ctx context.Context, req *backend.RunStreamReques
 			}
 
 			frame.AppendRow(fData...)
-
-			err := sender.SendFrame(
-				frame,
-				data.IncludeAll,
-			)
-
-			if err != nil {
+			if err := sender.SendFrame(frame, data.IncludeAll); err != nil {
 				logger.Error("Failed send frame", "error", err)
 			}
 		}
 	}
-
 }
 
 type queryModel struct {
 	SQL string `json:"sql"`
 }
 
-// CheckHealth handles health checks sent from Grafana to the plugin.
-// The main use case for these health checks is the test button on the
-// datasource configuration page which allows users to verify that
-// a datasource is working as expected.
 func (d *Datasource) CheckHealth(ctx context.Context, req *backend.CheckHealthRequest) (*backend.CheckHealthResult, error) {
 	logger := log.DefaultLogger.FromContext(ctx)
 	res := &backend.CheckHealthResult{}
@@ -227,9 +207,9 @@ func (d *Datasource) CheckHealth(ctx context.Context, req *backend.CheckHealthRe
 		return res, nil
 	}
 
-	engine := timeplus.NewEngine(logger, config.Host, config.Port, config.Username, config.Secrets.Password)
+	engine := timeplus.NewEngine(logger, config.Host, config.TCPPort, config.HTTPPort, config.Username, config.Secrets.Password)
 
-	if err := engine.Ping(); err != nil {
+	if err := engine.Ping(ctx); err != nil {
 		res.Status = backend.HealthStatusError
 		res.Message = "failed to ping timeplusd: " + err.Error()
 		return res, nil

@@ -4,15 +4,22 @@ import (
 	"bytes"
 	"context"
 	"database/sql"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
 	"time"
 
 	"github.com/grafana/grafana-plugin-sdk-go/backend/log"
 
 	protonDriver "github.com/timeplus-io/proton-go-driver/v2"
+)
+
+const (
+	bufferSize     = 1000
+	defaultTimeout = 10 * time.Second
 )
 
 type Column struct {
@@ -24,28 +31,54 @@ type TimeplusEngine struct {
 	connection *sql.DB
 	logger     log.Logger
 	analyzeURL string
+	pingURL    string
+	client     *http.Client
+	header     http.Header
 }
 
-func NewEngine(logger log.Logger, host string, port int, username, password string) *TimeplusEngine {
+func NewEngine(logger log.Logger, host string, tcpPort, httpPort int, username, password string) *TimeplusEngine {
 	connection := protonDriver.OpenDB(&protonDriver.Options{
-		Addr: []string{fmt.Sprintf("%s:%d", host, port)},
+		Addr: []string{fmt.Sprintf("%s:%d", host, tcpPort)},
 		Auth: protonDriver.Auth{
 			Username: username,
 			Password: password,
 		},
-		DialTimeout: 10 * time.Second,
+		DialTimeout: defaultTimeout,
 		Debug:       false,
 	})
+
+	header := http.Header{}
+	header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s:%s", username, password))))
+	header.Set("Content-Type", "application/json")
 
 	return &TimeplusEngine{
 		connection: connection,
 		logger:     logger,
-		analyzeURL: fmt.Sprintf("http://%s:%d/proton/v1/sqlanalyzer", host, 3218),
+		analyzeURL: fmt.Sprintf("http://%s:%d/proton/v1/sqlanalyzer", host, httpPort),
+		pingURL:    fmt.Sprintf("http://%s:%d/proton/ping", host, httpPort),
+		header:     header,
+		client: &http.Client{
+			Timeout: defaultTimeout,
+			Transport: &http.Transport{
+				Dial: (&net.Dialer{
+					Timeout: defaultTimeout,
+				}).Dial,
+				TLSHandshakeTimeout: defaultTimeout,
+			},
+		},
 	}
 }
 
-func (e *TimeplusEngine) Ping() error {
-	return e.connection.Ping()
+func (e *TimeplusEngine) Ping(ctx context.Context) error {
+	if err := e.pingHttp(ctx); err != nil {
+		return fmt.Errorf("failed to ping via http: %w", err)
+	}
+
+	if err := e.connection.Ping(); err != nil {
+		return fmt.Errorf("failed to ping via tcp: %w", err)
+	}
+
+	return nil
 }
 
 func (e *TimeplusEngine) RunQuery(ctx context.Context, sql string) ([]*sql.ColumnType, chan []any, error) {
@@ -61,7 +94,7 @@ func (e *TimeplusEngine) RunQuery(ctx context.Context, sql string) ([]*sql.Colum
 		return nil, nil, err
 	}
 
-	ch := make(chan []any, 1000)
+	ch := make(chan []any, bufferSize)
 
 	go func() {
 		defer func() {
@@ -109,15 +142,16 @@ func (e *TimeplusEngine) IsStreamingQuery(ctx context.Context, query string) (bo
 	if err != nil {
 		return false, err
 	}
-	req.Header.Set("Content-Type", "application/json")
+	req.Header = e.header
 
-	client := &http.Client{}
-	resp, err := client.Do(req)
+	resp, err := e.client.Do(req)
 	if err != nil {
 		return false, err
 	}
-
 	defer resp.Body.Close()
+	if resp.StatusCode < 200 || resp.StatusCode > 399 {
+		return false, fmt.Errorf("failed to analyze %d", resp.StatusCode)
+	}
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
@@ -135,4 +169,23 @@ func (e *TimeplusEngine) IsStreamingQuery(ctx context.Context, query string) (bo
 	}
 
 	return isStreaming, nil
+}
+
+func (e *TimeplusEngine) pingHttp(ctx context.Context) error {
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, e.pingURL, nil)
+	if err != nil {
+		return err
+	}
+	req.Header = e.header
+
+	resp, err := e.client.Do(req)
+	if err != nil {
+		return err
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("failed to ping, got %d", resp.StatusCode)
+	}
+
+	return nil
 }
