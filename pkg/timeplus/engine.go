@@ -1,14 +1,17 @@
 package timeplus
 
 import (
+	"bytes"
 	"context"
 	"database/sql"
+	"encoding/json"
 	"fmt"
+	"io"
+	"net/http"
 	"time"
 
 	"github.com/grafana/grafana-plugin-sdk-go/backend/log"
 
-	"github.com/reactivex/rxgo/v2"
 	protonDriver "github.com/timeplus-io/proton-go-driver/v2"
 )
 
@@ -20,14 +23,7 @@ type Column struct {
 type TimeplusEngine struct {
 	connection *sql.DB
 	logger     log.Logger
-}
-
-type TimeplusQueryState struct {
-	Query       string
-	AddNow      bool
-	Stream      chan rxgo.Item
-	ColumnArray []Column
-	Cancel      context.CancelFunc
+	analyzeURL string
 }
 
 func NewEngine(logger log.Logger, host string, port int, username, password string) *TimeplusEngine {
@@ -44,6 +40,7 @@ func NewEngine(logger log.Logger, host string, port int, username, password stri
 	return &TimeplusEngine{
 		connection: connection,
 		logger:     logger,
+		analyzeURL: fmt.Sprintf("http://%s:%d/proton/v1/sqlanalyzer", host, 3218),
 	}
 }
 
@@ -98,6 +95,44 @@ func (e *TimeplusEngine) RunQuery(ctx context.Context, sql string) ([]*sql.Colum
 }
 
 func (e *TimeplusEngine) Dispose() error {
-	e.logger.Info("Dispose!!!!!")
 	return e.connection.Close()
+}
+
+func (e *TimeplusEngine) IsStreamingQuery(ctx context.Context, query string) (bool, error) {
+	queryMap := map[string]string{"query": query}
+	jsonData, err := json.Marshal(queryMap)
+	if err != nil {
+		return false, err
+	}
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, e.analyzeURL, bytes.NewBuffer(jsonData))
+	if err != nil {
+		return false, err
+	}
+	req.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return false, err
+	}
+
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return false, err
+	}
+
+	var response map[string]interface{}
+	if err = json.Unmarshal(body, &response); err != nil {
+		return false, err
+	}
+
+	isStreaming, ok := response["is_streaming"].(bool)
+	if !ok {
+		return false, fmt.Errorf("invalid response %s", response)
+	}
+
+	return isStreaming, nil
 }

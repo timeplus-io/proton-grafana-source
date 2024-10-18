@@ -4,10 +4,12 @@ import (
 	"context"
 	"encoding/json"
 
+	"github.com/google/uuid"
 	"github.com/grafana/grafana-plugin-sdk-go/backend"
 	"github.com/grafana/grafana-plugin-sdk-go/backend/instancemgmt"
 	"github.com/grafana/grafana-plugin-sdk-go/backend/log"
 	"github.com/grafana/grafana-plugin-sdk-go/data"
+	"github.com/grafana/grafana-plugin-sdk-go/live"
 	"github.com/timeplus-io/proton-grafana-source/pkg/models"
 	"github.com/timeplus-io/proton-grafana-source/pkg/timeplus"
 )
@@ -36,14 +38,87 @@ func NewDatasource(ctx context.Context, settings backend.DataSourceInstanceSetti
 	logger.Debug("new timeplus source")
 
 	return &Datasource{
-		engine: engine,
+		engine:  engine,
+		queries: make(map[string]string),
 	}, nil
 }
 
 // Datasource is an example datasource which can respond to data queries, reports
 // its health and has streaming skills.
 type Datasource struct {
-	engine timeplus.Engine
+	engine  timeplus.Engine
+	queries map[string]string
+}
+
+func (d *Datasource) QueryData(ctx context.Context, req *backend.QueryDataRequest) (*backend.QueryDataResponse, error) {
+	logger := log.DefaultLogger.FromContext(ctx)
+	logger.Info("QueryData called")
+	response := backend.NewQueryDataResponse()
+
+	for _, query := range req.Queries {
+		q := queryModel{}
+		if err := json.Unmarshal(query.JSON, &q); err != nil {
+			return nil, err
+		}
+
+		resp := backend.DataResponse{}
+		frame := data.NewFrame("response")
+
+		isStreaming, err := d.engine.IsStreamingQuery(ctx, q.SQL)
+		if err != nil {
+			return nil, err
+		}
+
+		if isStreaming {
+			id := uuid.NewString()
+			d.queries[id] = q.SQL
+			channel := live.Channel{
+				Scope:     live.ScopeDatasource,
+				Namespace: req.PluginContext.DataSourceInstanceSettings.UID,
+				Path:      id,
+			}
+			frame.SetMeta(&data.FrameMeta{Channel: channel.String()})
+			resp.Frames = append(resp.Frames, frame)
+		} else {
+			columnTypes, ch, err := d.engine.RunQuery(ctx, q.SQL)
+			if err != nil {
+				return nil, err
+			}
+
+			for _, col := range columnTypes {
+				frame.Fields = append(frame.Fields, timeplus.NewDataFieldByType(col.Name(), col.DatabaseTypeName()))
+			}
+
+		LOOP:
+			for {
+				select {
+				case <-ctx.Done():
+					logger.Info("RunStream ctx done")
+					return nil, ctx.Err()
+				case row, ok := <-ch:
+					if !ok {
+						logger.Info("Query finished")
+
+						resp.Frames = append(resp.Frames, frame)
+						break LOOP
+					}
+
+					fData := make([]any, len(columnTypes))
+					for i, r := range row {
+						col := columnTypes[i]
+						fData[i] = timeplus.ParseValue(col.Name(), col.DatabaseTypeName(), nil, r, false)
+					}
+
+					frame.AppendRow(fData...)
+				}
+			}
+
+		}
+
+		response.Responses[query.RefID] = resp
+	}
+
+	return response, nil
 }
 
 // Dispose here tells plugin SDK that plugin wants to clean up resources when a new instance
@@ -58,17 +133,19 @@ func (d *Datasource) Dispose() {
 }
 
 func (d *Datasource) SubscribeStream(ctx context.Context, req *backend.SubscribeStreamRequest) (*backend.SubscribeStreamResponse, error) {
-	logger := log.DefaultLogger.FromContext(ctx)
-	logger.Debug("SubscribeStream", "path", req.Path, "sql", req.Data)
+	var status backend.SubscribeStreamStatus
+	if _, ok := d.queries[req.Path]; ok {
+		status = backend.SubscribeStreamStatusOK
+	} else {
+		status = backend.SubscribeStreamStatusNotFound
+	}
 
 	return &backend.SubscribeStreamResponse{
-		Status: backend.SubscribeStreamStatusOK,
+		Status: status,
 	}, nil
 }
 
 func (d *Datasource) PublishStream(ctx context.Context, _ *backend.PublishStreamRequest) (*backend.PublishStreamResponse, error) {
-	logger := log.DefaultLogger.FromContext(ctx)
-	logger.Debug("PublishStream")
 	return &backend.PublishStreamResponse{
 		Status: backend.PublishStreamStatusPermissionDenied,
 	}, nil
@@ -77,14 +154,13 @@ func (d *Datasource) PublishStream(ctx context.Context, _ *backend.PublishStream
 func (d *Datasource) RunStream(ctx context.Context, req *backend.RunStreamRequest, sender *backend.StreamSender) error {
 	logger := log.DefaultLogger.FromContext(ctx)
 
-	logger.Debug("RunStream", "sql", req.Data, "path", req.Path)
-
-	q := queryModel{}
-	if err := json.Unmarshal(req.Data, &q); err != nil {
-		return err
+	path := req.Path
+	sql, ok := d.queries[path]
+	if !ok {
+		return nil
 	}
 
-	columnTypes, ch, err := d.engine.RunQuery(ctx, q.SQL)
+	columnTypes, ch, err := d.engine.RunQuery(ctx, sql)
 	if err != nil {
 		return err
 	}
