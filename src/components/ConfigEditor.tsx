@@ -80,7 +80,7 @@ export function ConfigEditor(props: Props) {
         <Input
           id="config-editor-host"
           onChange={onHostChange}
-          value={jsonData.host || "localhost"}
+          value={jsonData.host}
           placeholder="Enter the host, e.g. localhost"
           width={40}
         />
@@ -91,7 +91,6 @@ export function ConfigEditor(props: Props) {
           type='number'
           onChange={onTCPPortChange}
           value={jsonData.tcpPort}
-          defaultValue="8463"
           placeholder="8463"
           width={40}
         />
@@ -102,7 +101,6 @@ export function ConfigEditor(props: Props) {
           type='number'
           onChange={onHTTPPortChange}
           value={jsonData.httpPort}
-          defaultValue="3218"
           placeholder="3218"
           width={40}
         />
