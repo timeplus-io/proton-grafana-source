@@ -19,8 +19,11 @@
       "large": "img/timeplus.svg"
     },
     "links": [],
-    "screenshots": [{"name": "Query Editor","path": "img/query.png"},{"name": "Dashboard","path": "img/dashboard.png"}],
-    "version": "1.0.3",
+    "screenshots": [
+      { "name": "Query Editor", "path": "img/query.png" },
+      { "name": "Dashboard", "path": "img/dashboard.png" }
+    ],
+    "version": "1.1.0",
     "updated": "2023-12-20"
   },
   "dependencies": {

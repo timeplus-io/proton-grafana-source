@@ -1,6 +1,6 @@
 {
   "name": "timeplus-proton-datasource",
-  "version": "1.0.3",
+  "version": "1.1.0",
   "description": "Grafana data source plugin to connect to Proton and visualize streaming or batch queries.",
   "scripts": {
     "build": "webpack -c ./.config/webpack/webpack.config.ts --env production",
