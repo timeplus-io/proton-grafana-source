@@ -3,10 +3,6 @@ package plugin
 import (
 	"context"
 	"encoding/json"
-	"time"
-
-	"timeplus-proton-datasource/pkg/parser"
-	"timeplus-proton-datasource/pkg/proton"
 
 	"github.com/google/uuid"
 	"github.com/grafana/grafana-plugin-sdk-go/backend"
@@ -14,227 +10,213 @@ import (
 	"github.com/grafana/grafana-plugin-sdk-go/backend/log"
 	"github.com/grafana/grafana-plugin-sdk-go/data"
 	"github.com/grafana/grafana-plugin-sdk-go/live"
+	"github.com/timeplus-io/proton-grafana-source/pkg/models"
+	"github.com/timeplus-io/proton-grafana-source/pkg/timeplus"
 )
 
-// Make sure Datasource implements required interfaces. This is important to do
-// since otherwise we will only get a not implemented error response from plugin in
-// runtime. In this example datasource instance implements backend.QueryDataHandler,
-// backend.CheckHealthHandler interfaces. Plugin should not implement all these
-// interfaces- only those which are required for a particular task.
 var (
-	_ backend.QueryDataHandler      = (*ProtonDatasource)(nil)
-	_ backend.CheckHealthHandler    = (*ProtonDatasource)(nil)
-	_ instancemgmt.InstanceDisposer = (*ProtonDatasource)(nil)
+	_ backend.CheckHealthHandler    = (*Datasource)(nil)
+	_ backend.StreamHandler         = (*Datasource)(nil)
+	_ instancemgmt.InstanceDisposer = (*Datasource)(nil)
 )
 
-func getDatasourceSettings(s backend.DataSourceInstanceSettings) (*proton.Options, error) {
-	settings := &proton.Options{}
-	if err := json.Unmarshal(s.JSONData, settings); err != nil {
-		return nil, err
-	}
-	return settings, nil
-}
-
-type ProtonDatasource struct {
-	logger log.Logger
-	client proton.Client
-}
-
-// NewDatasource creates a new datasource instance.
-func NewDatasource(ctx context.Context, s backend.DataSourceInstanceSettings) (instancemgmt.Instance, error) {
-	settings, err := getDatasourceSettings(s)
+func NewDatasource(ctx context.Context, settings backend.DataSourceInstanceSettings) (instancemgmt.Instance, error) {
+	logger := log.DefaultLogger.FromContext(ctx)
+	conf, err := models.LoadPluginSettings(settings)
 	if err != nil {
 		return nil, err
 	}
-	logger := log.NewWithLevel(log.Info)
-	//logger.Info("NewProtonDatasource called", "settings", settings)
 
-	client := proton.NewEngine(*settings)
+	engine := timeplus.NewEngine(logger, conf.Host, conf.TCPPort, conf.HTTPPort, conf.Username, conf.Secrets.Password)
 
-	return &ProtonDatasource{
-		logger,
-		client}, nil
+	logger.Debug("new timeplus source created")
+
+	return &Datasource{
+		engine:  engine,
+		queries: make(map[string]string),
+	}, nil
 }
 
-// Dispose here tells plugin SDK that plugin wants to clean up resources when a new instance
-// created. As soon as datasource settings change detected by SDK old datasource instance will
-// be disposed and a new one will be created using NewSampleDatasource factory function.
-func (d *ProtonDatasource) Dispose() {
-	// d.logger.Info("[datasource.go] Dispose called")
-	// Clean up datasource instance resources.
-	d.client.Dispose()
+// Datasource is an example datasource which can respond to data queries, reports
+// its health and has streaming skills.
+type Datasource struct {
+	engine  timeplus.Engine
+	queries map[string]string
 }
 
-// QueryData handles multiple queries and returns multiple responses.
-// req contains the queries []DataQuery (where each query contains RefID as a unique identifier).
-// The QueryDataResponse contains a map of RefID to the response for each query, and each response
-// contains Frames ([]*Frame).
-func (d *ProtonDatasource) QueryData(ctx context.Context, req *backend.QueryDataRequest) (*backend.QueryDataResponse, error) {
+func (d *Datasource) QueryData(ctx context.Context, req *backend.QueryDataRequest) (*backend.QueryDataResponse, error) {
+	logger := log.DefaultLogger.FromContext(ctx)
 	response := backend.NewQueryDataResponse()
 
-	// loop over queries and execute them individually.
-	for _, q := range req.Queries {
-		res := d.query(ctx, req.PluginContext, q)
+	for _, query := range req.Queries {
+		q := queryModel{}
+		if err := json.Unmarshal(query.JSON, &q); err != nil {
+			return nil, err
+		}
 
-		// save the response in a hashmap
-		// based on with RefID as identifier
-		response.Responses[q.RefID] = res
+		resp := backend.DataResponse{}
+		frame := data.NewFrame("response")
+
+		isStreaming, err := d.engine.IsStreamingQuery(ctx, q.SQL)
+		if err != nil {
+			return nil, err
+		}
+
+		if isStreaming {
+			id := uuid.NewString()
+			d.queries[id] = q.SQL
+			channel := live.Channel{
+				Scope:     live.ScopeDatasource,
+				Namespace: req.PluginContext.DataSourceInstanceSettings.UID,
+				Path:      id,
+			}
+			frame.SetMeta(&data.FrameMeta{Channel: channel.String()})
+			resp.Frames = append(resp.Frames, frame)
+		} else {
+			columnTypes, ch, err := d.engine.RunQuery(ctx, q.SQL)
+			if err != nil {
+				return nil, err
+			}
+
+			for _, col := range columnTypes {
+				frame.Fields = append(frame.Fields, timeplus.NewDataFieldByType(col.Name(), col.DatabaseTypeName()))
+			}
+
+		LOOP:
+			for {
+				select {
+				case <-ctx.Done():
+					return nil, ctx.Err()
+				case row, ok := <-ch:
+					if !ok {
+						logger.Info("Query finished")
+
+						resp.Frames = append(resp.Frames, frame)
+						break LOOP
+					}
+
+					fData := make([]any, len(columnTypes))
+					for i, r := range row {
+						col := columnTypes[i]
+						fData[i] = timeplus.ParseValue(col.Name(), col.DatabaseTypeName(), nil, r, false)
+					}
+
+					frame.AppendRow(fData...)
+				}
+			}
+
+		}
+
+		response.Responses[query.RefID] = resp
 	}
 
 	return response, nil
 }
 
-type queryModel struct {
-	AddNow      bool   `json:"addNow"`
-	Query       string `json:"queryText"`
+// Dispose here tells plugin SDK that plugin wants to clean up resources when a new instance
+// created. As soon as datasource settings change detected by SDK old datasource instance will
+// be disposed and a new one will be created using NewSampleDatasource factory function.
+func (d *Datasource) Dispose() {
+	// log.DefaultLogger.Info("Dispose")
+	if err := d.engine.Dispose(); err != nil {
+		log.DefaultLogger.Error("failed to dispose", "error", err)
+		return
+	}
 }
 
-func (d *ProtonDatasource) query(_ context.Context, pCtx backend.PluginContext, query backend.DataQuery) backend.DataResponse {
-	response := backend.DataResponse{}
-
-	// Unmarshal the JSON into our queryModel.
-	var qm queryModel
-
-	response.Error = json.Unmarshal(query.JSON, &qm)
-	if response.Error != nil {
-		return response
-	}
-	//qm.Query can be null or empty String. Need to skip query to avoid error
-	if qm.Query == "" {
-		// d.logger.Info("[datasource.go] skip running the empty query")
-		return response
-	}
-	// Jove TODO: call Proton query analayzer API to figure out whether it's streaming query or not.
-	IsStreaming := d.client.IsStreamingQuery(qm.Query)
-	
-	// Generate an UUID for the proton query
-	id := uuid.Must(uuid.NewRandom()).String()
-	// d.logger.Info("[datasource.go] query with", "SQL", qm.Query, "QueryID", id, "RefID", query.RefID)
-
-	rows, err := d.client.RunQuery(qm.Query, id, IsStreaming, qm.AddNow)
-	if err != nil {
-		response.Error = err
-		d.logger.Error("[datasource.go] client.RunQuery failed. Cannot submit the query.", "error", err)
-		return response
-	}
-
-	// create data frame response
-	frame := data.NewFrame("response")
-	lenOfNow := 0
-	if qm.AddNow {
-		//if AddNow is one, we add the first column as now()
-		frame.Fields = append(frame.Fields, parser.NewTimeField("time", false))
-		lenOfNow = 1
-	}
-
-	for _, c := range d.client.GetQueryState(id).ColumnArray {
-		frame.Fields = append(frame.Fields, parser.NewDataFieldByType(c.Name, c.Type))
-	}
-
-	if IsStreaming {
-		// to subscribe on a client-side and consume updates from a plugin.
-		channel := live.Channel{
-			Scope:     live.ScopeDatasource,
-			Namespace: pCtx.DataSourceInstanceSettings.UID,
-			Path:      id, //important! use query id as the path, so that RunStream() can get it via req.Path
-		}
-		frame.SetMeta(&data.FrameMeta{Channel: channel.String()})
+func (d *Datasource) SubscribeStream(ctx context.Context, req *backend.SubscribeStreamRequest) (*backend.SubscribeStreamResponse, error) {
+	var status backend.SubscribeStreamStatus
+	if _, ok := d.queries[req.Path]; ok {
+		status = backend.SubscribeStreamStatusOK
 	} else {
-		//if it's not a streaming quer, then show all results in response
-		for _, row := range rows {
-			currentRow := make([]interface{}, len(row)+lenOfNow)
-			if qm.AddNow {
-				currentRow[0] = time.Now()
-			}
-			for i, r := range row {
-				currentRow[i+lenOfNow] = parser.ParseValue("whatever", d.client.GetQueryState(id).ColumnArray[i].Type, nil, r, false)
-			}
-			frame.AppendRow(currentRow...)
-		}
+		status = backend.SubscribeStreamStatusNotFound
 	}
-	// add the frames to the response.
-	response.Frames = append(response.Frames, frame)
-	return response
-}
-
-// CheckHealth handles health checks sent from Grafana to the plugin.
-// The main use case for these health checks is the test button on the
-// datasource configuration page which allows users to verify that
-// a datasource is working as expected.
-func (d *ProtonDatasource) CheckHealth(_ context.Context, req *backend.CheckHealthRequest) (*backend.CheckHealthResult, error) {
-	//d.logger.Info("CheckHealth called", "request", req)
-
-	if !d.client.IsConnected() {
-		return &backend.CheckHealthResult{
-			Status:  backend.HealthStatusError,
-			Message: "proton Disconnected",
-		}, nil
-	}
-
-	var status = backend.HealthStatusOk
-	var message = "Connnected to proton"
-
-	return &backend.CheckHealthResult{
-		Status:  status,
-		Message: message,
-	}, nil
-}
-
-func (d *ProtonDatasource) SubscribeStream(ctx context.Context, req *backend.SubscribeStreamRequest) (*backend.SubscribeStreamResponse, error) {
-	// d.logger.Info("SubscribeStream %v", req)
 
 	return &backend.SubscribeStreamResponse{
-		Status: backend.SubscribeStreamStatusOK,
+		Status: status,
 	}, nil
 }
 
-func (d *ProtonDatasource) PublishStream(ctx context.Context, req *backend.PublishStreamRequest) (*backend.PublishStreamResponse, error) {
-	// d.logger.Info("PublishStream called", "request", req)
-
-	// Do not allow publishing at all.
+func (d *Datasource) PublishStream(ctx context.Context, _ *backend.PublishStreamRequest) (*backend.PublishStreamResponse, error) {
 	return &backend.PublishStreamResponse{
 		Status: backend.PublishStreamStatusPermissionDenied,
 	}, nil
 }
 
-func (d *ProtonDatasource) RunStream(ctx context.Context, req *backend.RunStreamRequest, sender *backend.StreamSender) error {
-	state := d.client.GetQueryState(req.Path)
+func (d *Datasource) RunStream(ctx context.Context, req *backend.RunStreamRequest, sender *backend.StreamSender) error {
+	logger := log.DefaultLogger.FromContext(ctx)
 
-	// Stream data frames periodically till stream closed by Grafana.
+	path := req.Path
+	sql, ok := d.queries[path]
+	if !ok {
+		return nil
+	}
+
+	columnTypes, ch, err := d.engine.RunQuery(ctx, sql)
+	if err != nil {
+		return err
+	}
+
 	for {
 		select {
 		case <-ctx.Done():
-			//TODO, sometimes the 2nd streaming chart will get cancelled somehow
-			// d.logger.Info("[datasource.go] Context canceled, finish streaming", "path", req.Path)
-			d.client.StopQuery(req.Path)
-			return nil
-		case item := <-state.Stream:
+			return ctx.Err()
+		case row, ok := <-ch:
+			if !ok {
+				logger.Warn("Streaming query terminated")
+				return nil
+			}
 			frame := data.NewFrame("response")
-			lenOfNow := 0
-			if state.AddNow {
-				//if AddNow is one, we add the first column as now()
-				frame.Fields = append(frame.Fields, parser.NewTimeField("time", false))
-				lenOfNow = 1
+
+			for _, c := range columnTypes {
+				frame.Fields = append(frame.Fields, timeplus.NewDataFieldByType(c.Name(), c.DatabaseTypeName()))
 			}
 
-			for _, c := range state.ColumnArray {
-				frame.Fields = append(frame.Fields, parser.NewDataFieldByType(c.Name, c.Type))
-			}
-			row := item.V.([]interface{})
-			currentRow := make([]interface{}, len(row)+lenOfNow)
-			if state.AddNow {
-				currentRow[0] = time.Now()
-			}
+			fData := make([]any, len(columnTypes))
 			for i, r := range row {
-				currentRow[i+lenOfNow] = parser.ParseValue("whatever", state.ColumnArray[i].Type, nil, r, false)
+				col := columnTypes[i]
+				fData[i] = timeplus.ParseValue(col.Name(), col.DatabaseTypeName(), nil, r, false)
 			}
-			frame.AppendRow(currentRow...)
 
-			err := sender.SendFrame(frame, data.IncludeAll)
-			if err != nil {
-				d.logger.Error("Error sending frame", "error", err)
-				continue
+			frame.AppendRow(fData...)
+			if err := sender.SendFrame(frame, data.IncludeAll); err != nil {
+				logger.Error("Failed send frame", "error", err)
 			}
 		}
 	}
+}
+
+type queryModel struct {
+	SQL string `json:"sql"`
+}
+
+func (d *Datasource) CheckHealth(ctx context.Context, req *backend.CheckHealthRequest) (*backend.CheckHealthResult, error) {
+	logger := log.DefaultLogger.FromContext(ctx)
+	res := &backend.CheckHealthResult{}
+	config, err := models.LoadPluginSettings(*req.PluginContext.DataSourceInstanceSettings)
+
+	if err != nil {
+		res.Status = backend.HealthStatusError
+		res.Message = "Unable to load settings"
+		return res, nil
+	}
+
+	if len(config.Host) == 0 {
+		res.Status = backend.HealthStatusError
+		res.Message = "'Host' cannot be empty"
+		return res, nil
+	}
+
+	engine := timeplus.NewEngine(logger, config.Host, config.TCPPort, config.HTTPPort, config.Username, config.Secrets.Password)
+
+	if err := engine.Ping(ctx); err != nil {
+		res.Status = backend.HealthStatusError
+		res.Message = "failed to ping timeplusd: " + err.Error()
+		return res, nil
+	}
+
+	return &backend.CheckHealthResult{
+		Status:  backend.HealthStatusOk,
+		Message: "Proton data source is working",
+	}, nil
 }

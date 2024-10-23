@@ -1,4 +1,4 @@
-package parser
+package timeplus
 
 import (
 	"encoding/json"
@@ -129,7 +129,8 @@ func ParseValue(fieldName string, fieldType string, tz *time.Location, value int
 			}
 			return parseInt64Value(value, isNullable)
 		case "bool":
-			return value	
+			// For some reason grafana doesn't accept bool. We have to convert it into string. Bug?
+			return parseBoolValue(value, isNullable)
 		default:
 			if strings.HasPrefix(fieldType, "decimal") {
 				return parseDecimalValue(value, isNullable)
@@ -256,6 +257,23 @@ func parseInt64Value(value interface{}, isNullable bool) Value {
 		return nil
 	} else {
 		return int64(0)
+	}
+}
+
+func parseBoolValue(value interface{}, isNullable bool) Value {
+	if value != nil {
+		v := strconv.FormatBool(value.(bool))
+		if isNullable {
+			return &v
+		} else {
+			return v
+		}
+	}
+
+	if isNullable {
+		return nil
+	} else {
+		return string("false")
 	}
 }
 

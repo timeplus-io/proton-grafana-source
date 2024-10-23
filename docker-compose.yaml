@@ -1,24 +1,41 @@
 services:
+  grafana:
+    user: root
+    container_name: 'timeplus-proton-datasource'
+
+    build:
+      context: ./.config
+      args:
+        grafana_image: ${GRAFANA_IMAGE:-grafana-enterprise}
+        grafana_version: ${GRAFANA_VERSION:-11.2.2}
+        development: ${DEVELOPMENT:-false}
+    ports:
+      - 3000:3000/tcp
+      - 2345:2345/tcp # delve
+    security_opt:
+      - 'apparmor:unconfined'
+      - 'seccomp:unconfined'
+    cap_add:
+      - SYS_PTRACE
+    volumes:
+      - ./dist:/var/lib/grafana/plugins/timeplus-proton-datasource
+      - ./provisioning:/etc/grafana/provisioning
+      - .:/root/timeplus-proton-datasource
+
+    environment:
+      NODE_ENV: development
+      GF_LOG_FILTERS: plugin.timeplus-proton-datasource:debug
+      GF_LOG_LEVEL: debug
+      GF_DATAPROXY_LOGGING: 1
+      GF_PLUGINS_ALLOW_LOADING_UNSIGNED_PLUGINS: timeplus-proton-datasource
+
   proton:
     image: ghcr.io/timeplus-io/proton:latest
     pull_policy: always
     ports:
       - 3218:3218 # HTTP Streaming
       - 8463:8463 # TCP Streaming
-  grafana:
-    image: grafana/grafana:latest
-    pull_policy: always
-    ports:
-      - 3000:3000
-    environment:
-      GF_AUTH_ANONYMOUS_ENABLED: 1
-      GF_AUTH_ANONYMOUS_ORG_ROLE: Admin
-      GF_INSTALL_PLUGINS: timeplus-proton-datasource
-    volumes:
-      - ./provisioning:/etc/grafana/provisioning
-    depends_on:
-      - proton
-
+      
   carsharing_datagen:
     image: timeplus/cardemo:latest
     pull_policy: always
