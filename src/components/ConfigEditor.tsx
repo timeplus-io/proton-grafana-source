@@ -34,12 +34,11 @@ export function ConfigEditor(props: Props) {
       ...options,
       jsonData: {
         ...jsonData,
-        tcpPort: parseInt(event.target.value, 10) ,
+        tcpPort: parseInt(event.target.value, 10),
       },
     });
   };
- 
-  
+
   const onHTTPPortChange = (event: ChangeEvent<HTMLInputElement>) => {
     onOptionsChange({
       ...options,
@@ -88,7 +87,7 @@ export function ConfigEditor(props: Props) {
       <InlineField label="TCP Port" labelWidth={14} interactive tooltip={'TCP Port'}>
         <Input
           id="config-editor-tcp-port"
-          type='number'
+          type="number"
           onChange={onTCPPortChange}
           value={jsonData.tcpPort}
           placeholder="8463"
@@ -98,7 +97,7 @@ export function ConfigEditor(props: Props) {
       <InlineField label="HTTP Port" labelWidth={14} interactive tooltip={'HTTP Port'}>
         <Input
           id="config-editor-http-port"
-          type='number'
+          type="number"
           onChange={onHTTPPortChange}
           value={jsonData.httpPort}
           placeholder="3218"
@@ -110,7 +109,7 @@ export function ConfigEditor(props: Props) {
           id="config-editor-username"
           onChange={onUsernameChange}
           value={jsonData.username}
-          placeholder="Enter the username, e.g. timeplusd"
+          placeholder="Enter the username, e.g. admin"
           width={40}
         />
       </InlineField>
@@ -120,7 +119,7 @@ export function ConfigEditor(props: Props) {
           id="config-editor-password"
           isConfigured={secureJsonFields.password}
           value={secureJsonData?.password}
-          placeholder="Enter your Password"
+          placeholder="Enter your password"
           width={40}
           onReset={onResetPassword}
           onChange={onPasswordChange}
