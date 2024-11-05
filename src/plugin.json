@@ -1,15 +1,15 @@
 {
-  "$schema": "https://raw.githubusercontent.com/grafana/grafana/master/docs/sources/developers/plugins/plugin.schema.json",
+  "$schema": "https://raw.githubusercontent.com/grafana/grafana/main/docs/sources/developers/plugins/plugin.schema.json",
   "type": "datasource",
-  "name": "Proton",
+  "name": "Timeplus",
   "id": "timeplus-proton-datasource",
   "metrics": true,
   "backend": true,
   "streaming": true,
   "alerting": true,
-  "executable": "gpx_timeplus_proton",
+  "executable": "gpx_timeplus",
   "info": {
-    "description": "Proton is a unified streaming and historical data processing engine in a single binary. It helps data engineers and platform engineers solve complex real-time analytics use cases, and powers the Timeplus streaming analytics platform.",
+    "description": "Timeplus is a unified streaming and historical data processing engine in a single binary. It helps data engineers and platform engineers solve complex real-time analytics use cases, and powers the Timeplus streaming analytics platform. The core engine is open-sourced at https://github.com/timeplus-io/proton. Timeplus Enterprise, https://www.timeplus.com/product, reduces time, complexity, and cost by using SQL to build real-time applications, data pipelines, and dashboards at the edge or cloud.",
     "author": {
       "name": "Timeplus"
     },
@@ -19,12 +19,15 @@
       "large": "img/timeplus.svg"
     },
     "links": [],
-    "screenshots": [{"name": "Query Editor","path": "img/query.png"},{"name": "Dashboard","path": "img/dashboard.png"}],
-    "version": "1.0.3",
-    "updated": "2023-12-20"
+    "screenshots": [
+      { "name": "Query Editor", "path": "img/query.png" },
+      { "name": "Dashboard", "path": "img/dashboard.png" }
+    ],
+    "version": "2.0.0",
+    "updated": "2024-11-05"
   },
   "dependencies": {
-    "grafanaDependency": ">=10.0.3",
+    "grafanaDependency": ">=10.4.0",
     "plugins": []
   }
 }

@@ -3,10 +3,9 @@ package main
 import (
 	"os"
 
-	"timeplus-proton-datasource/pkg/plugin"
-
 	"github.com/grafana/grafana-plugin-sdk-go/backend/datasource"
 	"github.com/grafana/grafana-plugin-sdk-go/backend/log"
+	"github.com/timeplus-io/proton-grafana-source/pkg/plugin"
 )
 
 func main() {

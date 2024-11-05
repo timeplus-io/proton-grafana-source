@@ -1,14 +1,14 @@
 
 ## Overview / Introduction
 
-Grafana data source plugin to connect to Proton and visualize streaming or batch queries.
+Grafana data source plugin to connect to Timeplus Proton or Timeplus Enterprise, and visualize streaming or batch queries.
 
-[Proton](https://github.com/timeplus-io/proton) is a unified streaming and historical data processing engine in a single binary. It helps data engineers and platform engineers solve complex real-time analytics use cases, and powers the Timeplus streaming analytics platform.
+[Timeplus Proton](https://github.com/timeplus-io/proton) is a unified streaming and historical data processing engine in a single binary. It helps data engineers and platform engineers solve complex real-time analytics use cases, and powers the Timeplus streaming analytics platform. [Timeplus Enterprise](https://www.timeplus.com/product), reduces time, complexity, and cost by using SQL to build real-time applications, data pipelines, and dashboards at the edge or cloud.
 
 ## Requirements
-Grafana v10.0.3 or above
+Grafana v10.4.0 or above
 
-A running Proton instance with TCP port 8463 (for database connection) and HTTP port 3218 (for query analazyer REST API).
+A running Timeplus instance with TCP port 8463 (for database connection) and HTTP port 3218 (for query analazyer REST API).
 
 ## Getting Started
 
@@ -28,7 +28,7 @@ Search for Proton and accept the default settings (localhost,port 8463 and 3218 
 Create a new dashboard or explore data with this Proton data source.
 
 There are unbounded streaming query and bounded historical query in proton, all queries like `select count(*) from stream_name` are streaming queries, and adding `table` function to the stream name will turn the query into bounded query, e.g. `select count(*) from table(stream_name)`.
- 
+
 ## Documentation
 For more information about Timeplus Proton, please check https://docs.timeplus.com/proton.
 

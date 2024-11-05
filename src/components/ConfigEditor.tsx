@@ -1,79 +1,130 @@
-import React, { ChangeEvent, PureComponent } from 'react';
-import { LegacyForms } from '@grafana/ui';
+import React, { ChangeEvent } from 'react';
+import { InlineField, Input, SecretInput } from '@grafana/ui';
 import { DataSourcePluginOptionsEditorProps } from '@grafana/data';
-import { TpDataSourceOptions } from '../types';
+import { TpDataSourceOptions, TpSecureJsonData } from '../types';
 
-const { FormField } = LegacyForms;
+interface Props extends DataSourcePluginOptionsEditorProps<TpDataSourceOptions, TpSecureJsonData> {}
 
-interface Props extends DataSourcePluginOptionsEditorProps<TpDataSourceOptions> {}
+export function ConfigEditor(props: Props) {
+  const { onOptionsChange, options } = props;
+  const { jsonData, secureJsonFields, secureJsonData } = options;
 
-interface State {}
-
-export class ConfigEditor extends PureComponent<Props, State> {
-  onHostChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const { onOptionsChange, options } = this.props;
-    const jsonData = {
-      ...options.jsonData,
-      host: event.target.value,
-    };
-    onOptionsChange({ ...options, jsonData });
+  const onHostChange = (event: ChangeEvent<HTMLInputElement>) => {
+    onOptionsChange({
+      ...options,
+      jsonData: {
+        ...jsonData,
+        host: event.target.value,
+      },
+    });
   };
 
-  onPortChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const { onOptionsChange, options } = this.props;
-    const jsonData = {
-      ...options.jsonData,
-      port: parseInt(event.target.value, 10),
-    };
-    onOptionsChange({ ...options, jsonData });
+  const onUsernameChange = (event: ChangeEvent<HTMLInputElement>) => {
+    onOptionsChange({
+      ...options,
+      jsonData: {
+        ...jsonData,
+        username: event.target.value,
+      },
+    });
   };
 
-  onPortRESTChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const { onOptionsChange, options } = this.props;
-    const jsonData = {
-      ...options.jsonData,
-      port2: parseInt(event.target.value, 10),
-    };
-    onOptionsChange({ ...options, jsonData });
+  const onTCPPortChange = (event: ChangeEvent<HTMLInputElement>) => {
+    onOptionsChange({
+      ...options,
+      jsonData: {
+        ...jsonData,
+        tcpPort: parseInt(event.target.value, 10),
+      },
+    });
   };
 
-  render() {
-    const { options } = this.props;
-    const { jsonData } = options;
+  const onHTTPPortChange = (event: ChangeEvent<HTMLInputElement>) => {
+    onOptionsChange({
+      ...options,
+      jsonData: {
+        ...jsonData,
+        httpPort: parseInt(event.target.value, 10),
+      },
+    });
+  };
 
-    return (
-      <div className="gf-form-group">
-        <div className="gf-form">
-          <FormField
-            label="Host"
-            labelWidth={6}
-            inputWidth={20}
-            onChange={this.onHostChange}
-            value={jsonData.host || 'localhost'}
-            placeholder="Proton host"
-          />
-        </div>
-        <div className="gf-form">
-          <FormField
-            label="TCP Port"
-            labelWidth={6}
-            inputWidth={20}
-            onChange={this.onPortChange}
-            value={jsonData.port || 8463}
-            placeholder="8463"
-          />
-        </div>
-        <div className="gf-form">
-          <FormField
-            label="REST Port"
-            labelWidth={6}
-            inputWidth={20}
-            onChange={this.onPortRESTChange}
-            value={jsonData.port2 || 3218}
-            placeholder="3218"
-          />
-        </div>        
-      </div>
-    );
-  }
+  // Secure field (only sent to the backend)
+  const onPasswordChange = (event: ChangeEvent<HTMLInputElement>) => {
+    onOptionsChange({
+      ...options,
+      secureJsonData: {
+        password: event.target.value,
+      },
+    });
+  };
+
+  const onResetPassword = () => {
+    onOptionsChange({
+      ...options,
+      secureJsonFields: {
+        ...options.secureJsonFields,
+        password: false,
+      },
+      secureJsonData: {
+        ...options.secureJsonData,
+        password: '',
+      },
+    });
+  };
+
+  return (
+    <>
+      <InlineField label="Host" labelWidth={14} interactive tooltip={'Hostname'}>
+        <Input
+          id="config-editor-host"
+          onChange={onHostChange}
+          value={jsonData.host}
+          placeholder="Enter the host, e.g. localhost"
+          width={40}
+        />
+      </InlineField>
+      <InlineField label="TCP Port" labelWidth={14} interactive tooltip={'TCP Port'}>
+        <Input
+          id="config-editor-tcp-port"
+          type="number"
+          onChange={onTCPPortChange}
+          value={jsonData.tcpPort}
+          placeholder="8463"
+          width={40}
+        />
+      </InlineField>
+      <InlineField label="HTTP Port" labelWidth={14} interactive tooltip={'HTTP Port'}>
+        <Input
+          id="config-editor-http-port"
+          type="number"
+          onChange={onHTTPPortChange}
+          value={jsonData.httpPort}
+          placeholder="3218"
+          width={40}
+        />
+      </InlineField>
+      <InlineField label="Username" labelWidth={14} interactive tooltip={'Username'}>
+        <Input
+          id="config-editor-username"
+          onChange={onUsernameChange}
+          value={jsonData.username}
+          placeholder="Enter the username, e.g. admin"
+          width={40}
+        />
+      </InlineField>
+      <InlineField label="Password" labelWidth={14} interactive tooltip={'Password'}>
+        <SecretInput
+          required
+          id="config-editor-password"
+          isConfigured={secureJsonFields.password}
+          value={secureJsonData?.password}
+          placeholder="Enter your password"
+          width={40}
+          onReset={onResetPassword}
+          onChange={onPasswordChange}
+        />
+      </InlineField>
+    </>
+  );
 }
