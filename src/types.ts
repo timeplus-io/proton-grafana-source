@@ -22,11 +22,11 @@ export interface TpSecureJsonData {
   password?: string;
 }
 
-export interface MyVariableQuery {
+export interface TpVariableQuery {
   query: string;
 }
 
 export interface VariableQueryProps {
-  query: MyVariableQuery;
-  onChange: (query: MyVariableQuery, definition: string) => void;
+  query: TpVariableQuery;
+  onChange: (query: TpVariableQuery, definition: string) => void;
 }

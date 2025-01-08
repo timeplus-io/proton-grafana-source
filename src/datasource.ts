@@ -1,6 +1,6 @@
-import { DataSourceInstanceSettings, ScopedVars } from '@grafana/data';
+import { DataQueryRequest, DataSourceInstanceSettings, MetricFindValue, ScopedVars } from '@grafana/data';
 import { DataSourceWithBackend, getTemplateSrv } from '@grafana/runtime';
-import { MyVariableQuery, TpDataSourceOptions, TpQuery } from './types';
+import { TpDataSourceOptions, TpQuery, TpVariableQuery } from './types';
 
 export class DataSource extends DataSourceWithBackend<TpQuery, TpDataSourceOptions> {
   constructor(instanceSettings: DataSourceInstanceSettings<TpDataSourceOptions>) {
@@ -8,33 +8,40 @@ export class DataSource extends DataSourceWithBackend<TpQuery, TpDataSourceOptio
   }
 
 
-  metricFindQuery(query: MyVariableQuery, options?: any) {
+  metricFindQuery(query: TpVariableQuery, options?: any) {
+    let metrics: MetricFindValue[] = []
     if (!query || !options.variable.datasource) {
-      return Promise.resolve([]);
+      return Promise.resolve(metrics);
     }
 
-    const prom = new Promise((resolve) => {
+    const prom = new Promise<MetricFindValue[]>((resolve) => {
       const req = {
         targets: [{ datasource: options.variable.datasource,
           sql: query.query,
           refId: String(Math.random()) }],
         range: options ? options.range : (getTemplateSrv() as any).timeRange,
-      };
+      } as  DataQueryRequest<TpQuery> ;
 
       this.query(req).subscribe((res) => {
         const result = res.data[0] || { fields: [] }
 
-        if (result.fields.length > 0)  {
-          const labels = result.fields[0].values.map((v) => {
+
+        if (result.fields.length === 2) {
+          for (let i = 0; i < result.fields[0].values.length; i++) {
+            metrics.push({
+              text: result.fields[1].values[i],
+              value: result.fields[0].values[i]
+            })
+          }
+        } else if (result.fields.length === 1) {
+          metrics = result.fields[0].values.map((v: string) => {
             return {
             text: v,
             value: v
           }});
-
-          resolve(labels);
-          return
         }
-        resolve([]);
+        
+        resolve(metrics);
       });
     })
 

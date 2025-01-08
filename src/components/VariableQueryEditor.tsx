@@ -1,3 +1,4 @@
+import { Alert, CodeEditor, Field, Label, Stack } from '@grafana/ui';
 import React, { useState } from 'react';
 
 import { VariableQueryProps } from '../types';
@@ -9,18 +10,27 @@ export const VariableQueryEditor = ({ onChange, query }: VariableQueryProps) => 
     onChange(state, `${state.query}`);
   };
 
-  const handleChange = (event: React.FormEvent<HTMLInputElement>) =>
+  const onSQLChange = (sql: string) => {
     setState({
-      ...state,
-      [event.currentTarget.name]: event.currentTarget.value,
+      query: sql,
     });
+  };
 
   return (
-    <>
-      <div className="gf-form">
-        <span className="gf-form-label width-10">Query</span>
-        <input name="query" className="gf-form-input" onBlur={saveQuery} onChange={handleChange} value={state.query} />
-      </div>
-    </>
+    <Field
+      label=""
+      description="Make sure your query returns either 1 or 2 columns. If your query returns 1 column only, it will be used as the value and label. If it returns 2 columns, the first column will be used as the value while the second column will be used as the label."
+    >
+      <CodeEditor
+        onChange={onSQLChange}
+        onBlur={saveQuery}
+        width={600}
+        height={100}
+        language="sql"
+        showLineNumbers={true}
+        showMiniMap={false}
+        value={state.query}
+      />
+    </Field>
   );
 };
