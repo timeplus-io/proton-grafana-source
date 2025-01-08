@@ -37,6 +37,12 @@ type TimeplusEngine struct {
 }
 
 func NewEngine(logger log.Logger, host string, tcpPort, httpPort int, username, password string) *TimeplusEngine {
+	if tcpPort == 0 {
+		tcpPort = 8463
+	}
+	if httpPort == 0 {
+		httpPort = 3218
+	}
 	connection := protonDriver.OpenDB(&protonDriver.Options{
 		Addr: []string{fmt.Sprintf("%s:%d", host, tcpPort)},
 		Auth: protonDriver.Auth{
