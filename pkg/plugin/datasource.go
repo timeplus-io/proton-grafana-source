@@ -208,12 +208,6 @@ func (d *Datasource) CheckHealth(ctx context.Context, req *backend.CheckHealthRe
 		res.Message = "'Host' cannot be empty"
 		return res, nil
 	}
-	if len(config.Username) == 0 {
-		res.Status = backend.HealthStatusError
-		res.Message = "'Username' cannot be empty"
-		return res, nil
-	}
-
 	engine := timeplus.NewEngine(logger, config.Host, config.TCPPort, config.HTTPPort, config.Username, config.Secrets.Password)
 
 	if err := engine.Ping(ctx); err != nil {

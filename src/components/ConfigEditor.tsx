@@ -106,13 +106,12 @@ export function ConfigEditor(props: Props) {
           width={40}
         />
       </InlineField>
-      <InlineField required={true} label="Username" labelWidth={14} interactive tooltip={'Username'}>
+      <InlineField label="Username" labelWidth={14} interactive tooltip={'Username'}>
         <Input
-          required={true}
           id="config-editor-username"
           onChange={onUsernameChange}
           value={jsonData.username}
-          placeholder="Enter the username, e.g. admin"
+          placeholder="default"
           width={40}
         />
       </InlineField>

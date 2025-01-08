@@ -43,6 +43,10 @@ func NewEngine(logger log.Logger, host string, tcpPort, httpPort int, username, 
 	if httpPort == 0 {
 		httpPort = 3218
 	}
+	if len(username) == 0 {
+		username = "default"
+	}
+
 	connection := protonDriver.OpenDB(&protonDriver.Options{
 		Addr: []string{fmt.Sprintf("%s:%d", host, tcpPort)},
 		Auth: protonDriver.Auth{

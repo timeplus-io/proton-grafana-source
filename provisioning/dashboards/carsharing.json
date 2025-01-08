@@ -399,14 +399,14 @@
       {
         "current": {
           "selected": true,
-          "text": "c00013",
-          "value": "c00013"
+          "text": "c00000",
+          "value": "c00000"
         },
         "datasource": {
           "type": "timeplus-proton-datasource",
           "uid": "proton-ds"
         },
-        "definition": "select cid from table(car_live_data)",
+        "definition": "select cid from table(car_live_data) where _tp_time < to_datetime($__to/1000) and _tp_time > to_datetime($__from/1000)",
         "hide": 0,
         "includeAll": false,
         "label": "Car ID",
@@ -414,9 +414,9 @@
         "name": "cid",
         "options": [],
         "query": {
-          "query": "select cid from table(car_live_data)"
+          "query": "select cid from table(car_live_data) where _tp_time < to_datetime($__to/1000) and _tp_time > to_datetime($__from/1000)"
         },
-        "refresh": 1,
+        "refresh": 2,
         "regex": "",
         "skipUrlSync": false,
         "sort": 0,
@@ -432,6 +432,6 @@
   "timezone": "",
   "title": "Carsharing Demo Dashboard",
   "uid": "dd9e271d-7225-47d4-9e57-62133db0df62",
-  "version": 13,
+  "version": 1,
   "weekStart": ""
 }
