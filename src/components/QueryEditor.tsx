@@ -1,8 +1,9 @@
-import React from 'react';
-import { InlineField, Stack, CodeEditor } from '@grafana/ui';
-import { QueryEditorProps } from '@grafana/data';
-import { DataSource } from '../datasource';
+import { CodeEditor, InlineField, Stack } from '@grafana/ui';
 import { TpDataSourceOptions, TpQuery } from '../types';
+
+import { DataSource } from '../datasource';
+import { QueryEditorProps } from '@grafana/data';
+import React from 'react';
 
 type Props = QueryEditorProps<DataSource, TpQuery, TpDataSourceOptions>;
 
@@ -10,7 +11,6 @@ export function QueryEditor({ query, onChange }: Props) {
   const onSQLChange = (sql: string) => {
     onChange({ ...query, sql: sql });
   };
-
 
   const { sql } = query;
 
