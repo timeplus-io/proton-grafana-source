@@ -37,6 +37,16 @@ type TimeplusEngine struct {
 }
 
 func NewEngine(logger log.Logger, host string, tcpPort, httpPort int, username, password string) *TimeplusEngine {
+	if tcpPort == 0 {
+		tcpPort = 8463
+	}
+	if httpPort == 0 {
+		httpPort = 3218
+	}
+	if len(username) == 0 {
+		username = "default"
+	}
+
 	connection := protonDriver.OpenDB(&protonDriver.Options{
 		Addr: []string{fmt.Sprintf("%s:%d", host, tcpPort)},
 		Auth: protonDriver.Auth{
@@ -150,7 +160,16 @@ func (e *TimeplusEngine) IsStreamingQuery(ctx context.Context, query string) (bo
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode < 200 || resp.StatusCode > 399 {
-		return false, fmt.Errorf("failed to analyze %d", resp.StatusCode)
+		var errStr string
+
+		body, err := io.ReadAll(resp.Body)
+		if err != nil {
+			errStr = err.Error()
+		} else {
+			errStr = string(body)
+		}
+
+		return false, fmt.Errorf("failed to analyze code: %d, error: %s", resp.StatusCode, errStr)
 	}
 
 	body, err := io.ReadAll(resp.Body)

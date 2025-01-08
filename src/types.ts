@@ -1,5 +1,5 @@
-import { DataSourceJsonData } from '@grafana/data';
 import { DataQuery } from '@grafana/schema';
+import { DataSourceJsonData } from '@grafana/data';
 
 export interface TpQuery extends DataQuery {
   sql: string;
@@ -20,4 +20,13 @@ export interface TpDataSourceOptions extends DataSourceJsonData {
  */
 export interface TpSecureJsonData {
   password?: string;
+}
+
+export interface TpVariableQuery {
+  query: string;
+}
+
+export interface VariableQueryProps {
+  query: TpVariableQuery;
+  onChange: (query: TpVariableQuery, definition: string) => void;
 }
