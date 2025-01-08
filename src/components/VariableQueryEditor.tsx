@@ -1,4 +1,4 @@
-import { Alert, CodeEditor, Field, Label, Stack } from '@grafana/ui';
+import { CodeEditor, Field } from '@grafana/ui';
 import React, { useState } from 'react';
 
 import { VariableQueryProps } from '../types';
