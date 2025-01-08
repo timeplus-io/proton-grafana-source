@@ -23,7 +23,7 @@
       { "name": "Query Editor", "path": "img/query.png" },
       { "name": "Dashboard", "path": "img/dashboard.png" }
     ],
-    "version": "2.0.0",
+    "version": "2.1.0-beta.1",
     "updated": "2024-11-05"
   },
   "dependencies": {
