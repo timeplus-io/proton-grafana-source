@@ -73,6 +73,7 @@ func (d *Datasource) QueryData(ctx context.Context, req *backend.QueryDataReques
 			frame.SetMeta(&data.FrameMeta{Channel: channel.String()})
 			resp.Frames = append(resp.Frames, frame)
 		} else {
+			count := 0
 			columnTypes, ch, err := d.engine.RunQuery(ctx, q.SQL)
 			if err != nil {
 				return nil, err
@@ -89,7 +90,7 @@ func (d *Datasource) QueryData(ctx context.Context, req *backend.QueryDataReques
 					return nil, ctx.Err()
 				case row, ok := <-ch:
 					if !ok {
-						logger.Info("Query finished")
+						logger.Info("Query finished", "count", count)
 
 						resp.Frames = append(resp.Frames, frame)
 						break LOOP
@@ -99,6 +100,7 @@ func (d *Datasource) QueryData(ctx context.Context, req *backend.QueryDataReques
 					for i, r := range row {
 						col := columnTypes[i]
 						fData[i] = timeplus.ParseValue(col.Name(), col.DatabaseTypeName(), nil, r, false)
+						count++
 					}
 
 					frame.AppendRow(fData...)

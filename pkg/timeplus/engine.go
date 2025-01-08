@@ -150,7 +150,16 @@ func (e *TimeplusEngine) IsStreamingQuery(ctx context.Context, query string) (bo
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode < 200 || resp.StatusCode > 399 {
-		return false, fmt.Errorf("failed to analyze %d", resp.StatusCode)
+		var errStr string
+
+		body, err := io.ReadAll(resp.Body)
+		if err != nil {
+			errStr = err.Error()
+		} else {
+			errStr = string(body)
+		}
+
+		return false, fmt.Errorf("failed to analyze code: %d, error: %s", resp.StatusCode, errStr)
 	}
 
 	body, err := io.ReadAll(resp.Body)
