@@ -10,21 +10,22 @@ export class DataSource extends DataSourceWithBackend<TpQuery, TpDataSourceOptio
 
   metricFindQuery(query: TpVariableQuery, options?: any) {
     let metrics: MetricFindValue[] = []
-    if (!query || !options.variable.datasource) {
+    if (!query) {
       return Promise.resolve(metrics);
     }
 
     const prom = new Promise<MetricFindValue[]>((resolve) => {
       const req = {
-        targets: [{ datasource: options.variable.datasource,
+        targets: [
+        {
           sql: query.query,
-          refId: String(Math.random()) }],
+          refId: String(Math.random())
+        }],
         range: options ? options.range : (getTemplateSrv() as any).timeRange,
       } as  DataQueryRequest<TpQuery> ;
 
       this.query(req).subscribe((res) => {
         const result = res.data[0] || { fields: [] }
-
 
         if (result.fields.length === 2) {
           for (let i = 0; i < result.fields[0].values.length; i++) {
