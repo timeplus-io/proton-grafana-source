@@ -3,6 +3,8 @@ import { DataSourceWithBackend, getTemplateSrv } from '@grafana/runtime';
 import { TpDataSourceOptions, TpQuery, TpVariableQuery } from './types';
 
 export class DataSource extends DataSourceWithBackend<TpQuery, TpDataSourceOptions> {
+  annotations = {};
+  
   constructor(instanceSettings: DataSourceInstanceSettings<TpDataSourceOptions>) {
     super(instanceSettings);
   }
