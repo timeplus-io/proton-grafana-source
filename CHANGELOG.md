@@ -5,6 +5,7 @@
 Key changes:
 
 * Able to define dashboard variables with this data source
+* Use default values for HTTP/TCP ports and username if they are not set in the data source configuration
 
 ## 2.0.0
 
