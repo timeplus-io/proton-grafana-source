@@ -4,7 +4,8 @@
 
 Key changes:
 
-* Able to define dashboard variables with this data source
+* Able to define dashboard variables with this data source. Please make sure turning off the streaming query mode in the SQL to populate the variable values, and only return 1 or 2 columns. You can also refer to `__from` and `__to` variables in the SQL to get the time range of the dashboard.
+* Able to define annotations with this data source
 * Use default values for HTTP/TCP ports and username if they are not set in the data source configuration
 
 ## 2.0.0

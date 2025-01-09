@@ -24,8 +24,8 @@
       { "name": "Query Editor", "path": "img/query.png" },
       { "name": "Dashboard", "path": "img/dashboard.png" }
     ],
-    "version": "2.1.0-beta.1",
-    "updated": "2024-11-05"
+    "version": "2.1.0-beta.2",
+    "updated": "2025-01-09"
   },
   "dependencies": {
     "grafanaDependency": ">=10.4.0",
