@@ -7,6 +7,7 @@
   "backend": true,
   "streaming": true,
   "alerting": true,
+  "annotations": true,
   "executable": "gpx_timeplus",
   "info": {
     "description": "Timeplus is a unified streaming and historical data processing engine in a single binary. It helps data engineers and platform engineers solve complex real-time analytics use cases, and powers the Timeplus streaming analytics platform. The core engine is open-sourced at https://github.com/timeplus-io/proton. Timeplus Enterprise, https://www.timeplus.com/product, reduces time, complexity, and cost by using SQL to build real-time applications, data pipelines, and dashboards at the edge or cloud.",
