@@ -24,8 +24,8 @@ export const VariableQueryEditor = ({ onChange, query }: VariableQueryProps) => 
       <CodeEditor
         onChange={onSQLChange}
         onBlur={saveQuery}
-        width={600}
-        height={100}
+        width="100%"
+        height={200}
         language="sql"
         showLineNumbers={true}
         showMiniMap={false}
