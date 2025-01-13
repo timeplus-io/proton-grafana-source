@@ -22,9 +22,35 @@ A data source for Timeplus is created automatically.
 
 ### Use your own Grafana deployment
 
+Download the latest version from https://d.timeplus.com/grafana/timeplus-proton-datasource-2.1.0.zip
+
+Unzip the file and copy the folder to the Grafana plugin directory, usually `/var/lib/grafana/plugins/`.
+
+For example, on a Linux machine, you can run the following commands:
+
+```bash
+cd /var/lib/grafana
+mkdir plugins
+cd plugins
+wget d.timeplus.com/grafana/timeplus-proton-datasource-2.1.0.zip
+unzip timeplus-proton-datasource-2.1.0.zip
+/bin/systemctl start grafana-server.service
+```
+
+For macOS, you can run the following commands:
+
+```bash
+cd /opt/homebrew/var/lib/grafana
+mkdir plugins
+cd plugins
+wget d.timeplus.com/grafana/timeplus-proton-datasource-2.1.0.zip
+unzip timeplus-proton-datasource-2.1.0.zip
+brew services restart grafana
+```
+
 In the navigation menu, choose Connections -> Add new connection.
 
-Search for Timeplus and accept the default settings (localhost,port 8463 and 3218 as proton connection). This tool supports self-hosted Timeplus Enterprise, but not for Timeplus Cloud.
+Search for Timeplus and accept the default settings (localhost,port 8463 and 3218 as proton connection). For Timeplus Enterprise deployment, also set the username and password.
 
 Create a new dashboard or explore data with this Timeplus data source.
 
