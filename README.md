@@ -7,7 +7,7 @@ As the core engine of [Timeplus Enterprise](https://timeplus.com), [Proton](http
 
 ## Requirements
 
-Grafana v10.0.3 or above
+Grafana v11.3 or above (older versions may work but not verified)
 
 A running Timeplus Proton or Timeplus Enterprise instance with TCP port 8463 (for database connection) and HTTP port 3218 (for query analazyer REST API).
 
@@ -22,16 +22,47 @@ A data source for Timeplus is created automatically.
 
 ### Use your own Grafana deployment
 
+Download the latest version from https://d.timeplus.com/grafana/timeplus-proton-datasource-2.1.0.zip
+
+Unzip the file and copy the folder to the Grafana plugin directory, usually `/var/lib/grafana/plugins/`.
+
+For example, on a Linux machine, you can run the following commands:
+
+```bash
+cd /var/lib/grafana
+mkdir plugins
+cd plugins
+wget d.timeplus.com/grafana/timeplus-proton-datasource-2.1.0.zip
+unzip timeplus-proton-datasource-2.1.0.zip
+/bin/systemctl start grafana-server.service
+```
+
+For macOS, you can run the following commands:
+
+```bash
+cd /opt/homebrew/var/lib/grafana
+mkdir plugins
+cd plugins
+wget d.timeplus.com/grafana/timeplus-proton-datasource-2.1.0.zip
+unzip timeplus-proton-datasource-2.1.0.zip
+brew services restart grafana
+```
+
 In the navigation menu, choose Connections -> Add new connection.
 
-Search for Timeplus and accept the default settings (localhost,port 8463 and 3218 as proton connection). This plugin is expected to run in localhost or trusted network. Username and password for Timeplus will be added later. This tool supports self-hosted Timeplus Enterprise, but not for Timeplus Cloud.
+Search for Timeplus and accept the default settings (localhost,port 8463 and 3218 as proton connection). For Timeplus Enterprise deployment, also set the username and password.
 
 Create a new dashboard or explore data with this Timeplus data source.
 
-There are unbounded streaming query and bounded historical query in proton, all queries like `select count(*) from stream_name` are streaming queries, and adding `table` function to the stream name will turn the query into bounded query, e.g. `select count(*) from table(stream_name)`.
+There are unbounded streaming query and bounded historical query in Timeplus, all queries like `select count(*) from stream_name` are streaming queries, and adding `table` function to the stream name will turn the query into bounded query, e.g. `select count(*) from table(stream_name)`.
 
 ![query editor](src/img/query.png)
 
+### Query Variables
+You can define dashboard variables with this data source. Please make sure turning off the streaming query mode in the SQL to populate the variable values, and only return 1 or 2 columns. When there is 1 column returned, it will be set as both value and label. If there are 2 columns, the first column will be set as value and the second column as the label.  You can also refer to `__from` and `__to` variables in the SQL to get the time range of the dashboard, e.g.:
+```sql
+SELECT distinct product_id FROM table(coinbase)  where _tp_time < to_datetime($__to/1000) and _tp_time > to_datetime($__from/1000)
+```
 
 ## Development
 

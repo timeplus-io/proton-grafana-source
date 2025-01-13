@@ -1,7 +1,8 @@
-import React, { ChangeEvent } from 'react';
 import { InlineField, Input, SecretInput } from '@grafana/ui';
-import { DataSourcePluginOptionsEditorProps } from '@grafana/data';
+import React, { ChangeEvent } from 'react';
 import { TpDataSourceOptions, TpSecureJsonData } from '../types';
+
+import { DataSourcePluginOptionsEditorProps } from '@grafana/data';
 
 interface Props extends DataSourcePluginOptionsEditorProps<TpDataSourceOptions, TpSecureJsonData> {}
 
@@ -75,8 +76,9 @@ export function ConfigEditor(props: Props) {
 
   return (
     <>
-      <InlineField label="Host" labelWidth={14} interactive tooltip={'Hostname'}>
+      <InlineField required={true} label="Host" labelWidth={14} interactive tooltip={'Hostname'}>
         <Input
+          required={true}
           id="config-editor-host"
           onChange={onHostChange}
           value={jsonData.host}
@@ -109,7 +111,7 @@ export function ConfigEditor(props: Props) {
           id="config-editor-username"
           onChange={onUsernameChange}
           value={jsonData.username}
-          placeholder="Enter the username, e.g. admin"
+          placeholder="default"
           width={40}
         />
       </InlineField>
