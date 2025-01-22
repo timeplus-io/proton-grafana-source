@@ -32,8 +32,8 @@ For example, on a Linux machine, you can run the following commands:
 cd /var/lib/grafana
 mkdir plugins
 cd plugins
-wget d.timeplus.com/grafana/timeplus-proton-datasource-2.1.0.zip
-unzip timeplus-proton-datasource-2.1.0.zip
+wget d.timeplus.com/grafana/timeplus-proton-datasource-2.1.1.zip
+unzip timeplus-proton-datasource-2.1.1.zip
 /bin/systemctl start grafana-server.service
 ```
 
@@ -43,8 +43,8 @@ For macOS, you can run the following commands:
 cd /opt/homebrew/var/lib/grafana
 mkdir plugins
 cd plugins
-wget d.timeplus.com/grafana/timeplus-proton-datasource-2.1.0.zip
-unzip timeplus-proton-datasource-2.1.0.zip
+wget d.timeplus.com/grafana/timeplus-proton-datasource-2.1.1.zip
+unzip timeplus-proton-datasource-2.1.1.zip
 brew services restart grafana
 ```
 

@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.1.1
+
+Key changes:
+
+* propagate the error message from the backend to the frontend
+* set batch size to 1000 and batch interval to 100ms for the streaming query
+
 ## 2.1.0
 
 Key changes:
