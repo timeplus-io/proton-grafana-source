@@ -39,15 +39,20 @@ func NewDatasource(ctx context.Context, settings backend.DataSourceInstanceSetti
 
 	return &Datasource{
 		engine:  engine,
-		queries: make(map[string]string),
+		queries: map[string]queryReq{},
 	}, nil
+}
+
+type queryReq struct {
+	SQL   string
+	RefID string
 }
 
 // Datasource is an example datasource which can respond to data queries, reports
 // its health and has streaming skills.
 type Datasource struct {
 	engine  timeplus.Engine
-	queries map[string]string
+	queries map[string]queryReq
 }
 
 func (d *Datasource) QueryData(ctx context.Context, req *backend.QueryDataRequest) (*backend.QueryDataResponse, error) {
@@ -77,7 +82,10 @@ func (d *Datasource) QueryData(ctx context.Context, req *backend.QueryDataReques
 
 		if isStreaming {
 			id := uuid.NewString()
-			d.queries[id] = q.SQL
+			d.queries[id] = queryReq{
+				SQL:   q.SQL,
+				RefID: query.RefID,
+			}
 			channel := live.Channel{
 				Scope:     live.ScopeDatasource,
 				Namespace: req.PluginContext.DataSourceInstanceSettings.UID,
@@ -165,12 +173,12 @@ func (d *Datasource) RunStream(ctx context.Context, req *backend.RunStreamReques
 	logger := log.DefaultLogger.FromContext(ctx)
 
 	path := req.Path
-	sql, ok := d.queries[path]
+	queryReq, ok := d.queries[path]
 	if !ok {
 		return nil
 	}
 
-	columnTypes, ch, err := d.engine.RunQuery(ctx, sql)
+	columnTypes, ch, err := d.engine.RunQuery(ctx, queryReq.SQL)
 	if err != nil {
 		return err
 	}
@@ -192,6 +200,9 @@ func (d *Datasource) RunStream(ctx context.Context, req *backend.RunStreamReques
 			}
 			if frame == nil {
 				frame = data.NewFrame("response")
+
+				// RefID is needed for some grafana features. (e.g. Transformations -> Config from query results)
+				frame.RefID = queryReq.RefID
 
 				for _, c := range columnTypes {
 					frame.Fields = append(frame.Fields, timeplus.NewDataFieldByType(c.Name(), c.DatabaseTypeName()))
