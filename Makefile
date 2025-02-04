@@ -1,5 +1,5 @@
 ID = timeplus-proton-datasource
-Version = 2.1.1
+Version = 2.1.2
 
 init:
 	npm install

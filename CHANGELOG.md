@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.1.2
+
+Key changes:
+
+* Improved the data source to support more transformations in Grafana
+
 ## 2.1.1
 
 Key changes:
