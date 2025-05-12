@@ -22,7 +22,7 @@ A data source for Timeplus is created automatically.
 
 ### Use your own Grafana deployment
 
-Download the latest version from https://d.timeplus.com/grafana/timeplus-proton-datasource-2.1.0.zip
+Download the latest version from https://d.timeplus.com/grafana/timeplus-proton-datasource-2.1.3.zip
 
 Unzip the file and copy the folder to the Grafana plugin directory, usually `/var/lib/grafana/plugins/`.
 
