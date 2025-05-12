@@ -23,7 +23,7 @@
       "substitutePath": [
         {
           "from": "${workspaceFolder}",
-          "to": "/root/timeplus-timeplus-datasource"
+          "to": "/root/timeplus-proton-datasource"
         }
       ]
     }

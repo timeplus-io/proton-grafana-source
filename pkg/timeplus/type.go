@@ -37,7 +37,6 @@ func NewDataFieldByType(fieldName, fieldType string) *data.Field {
 	case "string", "uuid", "ipv6", "ipv4":
 		return newStringField(fieldName, isNullable)
 	case "float32", "float64":
-		//log.DefaultLogger.Info("[plugin.go] NewDateFieldByType", "fileldType", fieldType, "newFieldType", "float64")
 		return newFloat64Field(fieldName, isNullable)
 	case "uint64":
 		// This can be a time or uint64 value
@@ -189,12 +188,13 @@ func parseDecimalValue(value interface{}, isNullable bool) Value {
 
 func parseFloatValue(value interface{}, isNullable bool) Value {
 	if value != nil {
-		fv := reflect.ValueOf(value).Float()
+		val := reflect.ValueOf(value)
 		if isNullable {
-			return &fv
-		} else {
-			return fv
+			result := val.Elem().Float()
+			return &result
 		}
+
+		return val.Float()
 	}
 
 	if isNullable {
@@ -206,12 +206,13 @@ func parseFloatValue(value interface{}, isNullable bool) Value {
 
 func parseStringValue(value interface{}, isNullable bool) Value {
 	if value != nil {
-		str := reflect.ValueOf(value).String()
+		val := reflect.ValueOf(value)
 		if isNullable {
-			return &str
-		} else {
-			return str
+			result := val.Elem().String()
+			return &result
 		}
+
+		return val.String()
 	}
 
 	if isNullable {
@@ -223,8 +224,12 @@ func parseStringValue(value interface{}, isNullable bool) Value {
 
 func parseUInt64Value(value interface{}, isNullable bool) Value {
 	if value != nil {
-		ui64v, err := strconv.ParseUint(fmt.Sprintf("%v", value), 10, 64)
+		toBeConvert := reflect.ValueOf(value)
+		if isNullable {
+			toBeConvert = toBeConvert.Elem()
+		}
 
+		ui64v, err := strconv.ParseUint(fmt.Sprintf("%v", toBeConvert), 10, 64)
 		if err == nil {
 			if isNullable {
 				return &ui64v
@@ -242,8 +247,12 @@ func parseUInt64Value(value interface{}, isNullable bool) Value {
 
 func parseInt64Value(value interface{}, isNullable bool) Value {
 	if value != nil {
-		i64v, err := strconv.ParseInt(fmt.Sprintf("%v", value), 10, 64)
+		toBeConvert := reflect.ValueOf(value)
+		if isNullable {
+			toBeConvert = toBeConvert.Elem()
+		}
 
+		i64v, err := strconv.ParseInt(fmt.Sprintf("%v", toBeConvert), 10, 64)
 		if err == nil {
 			if isNullable {
 				return &i64v
@@ -262,11 +271,12 @@ func parseInt64Value(value interface{}, isNullable bool) Value {
 
 func parseBoolValue(value interface{}, isNullable bool) Value {
 	if value != nil {
-		v := strconv.FormatBool(value.(bool))
 		if isNullable {
+			b := value.(*bool)
+			v := strconv.FormatBool(*b)
 			return &v
 		} else {
-			return v
+			return strconv.FormatBool(value.(bool))
 		}
 	}
 
@@ -302,20 +312,14 @@ func parseTimestampValue(value interface{}, isNullable bool) Value {
 
 func parseDateTimeValue(value interface{}, layout string, timezone *time.Location, isNullable bool) Value {
 	if value != nil {
-		t := value
-		/*
-				strValue := fmt.Sprintf("%v", value)
-				t, err := time.ParseInLocation(layout, strValue, timezone)
-				log.DefaultLogger.Info("parseDateTimeValue", "value", value, "strValue", strValue, "t", t)
-			if err == nil {
-		*/
-
 		if isNullable {
-			return &t
-		} else {
+			t := value.(*time.Time)
 			return t
+		} else {
+			return value
 		}
 	}
+
 	if isNullable {
 		return nil
 	} else {

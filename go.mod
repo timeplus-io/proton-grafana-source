@@ -7,7 +7,8 @@ toolchain go1.23.2
 require (
 	github.com/google/uuid v1.6.0
 	github.com/grafana/grafana-plugin-sdk-go v0.261.0
-	github.com/timeplus-io/proton-go-driver/v2 v2.0.17
+	github.com/magefile/mage v1.15.0
+	github.com/timeplus-io/proton-go-driver/v2 v2.1.1
 )
 
 require (
@@ -45,7 +46,6 @@ require (
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/klauspost/compress v1.17.11 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.9 // indirect
-	github.com/magefile/mage v1.15.0 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/mattetti/filebuffer v1.0.1 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
