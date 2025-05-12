@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.1.3
+
+Key changes:
+
+* Fixed nullable data type
+
 ## 2.1.2
 
 Key changes:
