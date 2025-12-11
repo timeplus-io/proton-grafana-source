@@ -10,6 +10,9 @@ dev:
 build:
 	mage -v
 
+debug_build:
+	mage build:debug
+
 package:
 	mv dist/ $(ID)
 	zip $(ID)-$(Version).zip $(ID) -r
