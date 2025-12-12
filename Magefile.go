@@ -11,7 +11,7 @@ import (
 
 func Build4() { //revive:disable-line
 	b := build.Build{}
-	mg.Deps(b.Windows, b.Darwin, b.DarwinARM64, b.Linux, b.LinuxARM64, b.GenerateManifestFile)
+	mg.Deps(b.Windows, b.Darwin, b.DarwinARM64, b.LinuxARM64, b.GenerateManifestFile)
 }
 
 // Default configures the default target.

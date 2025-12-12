@@ -3,6 +3,7 @@ package plugin
 import (
 	"context"
 	"encoding/json"
+	"sync"
 	"time"
 
 	"github.com/google/uuid"
@@ -53,6 +54,7 @@ type queryReq struct {
 type Datasource struct {
 	engine  timeplus.Engine
 	queries map[string]queryReq
+	mu      sync.RWMutex
 }
 
 func (d *Datasource) QueryData(ctx context.Context, req *backend.QueryDataRequest) (*backend.QueryDataResponse, error) {
@@ -82,10 +84,12 @@ func (d *Datasource) QueryData(ctx context.Context, req *backend.QueryDataReques
 
 		if isStreaming {
 			id := uuid.NewString()
+			d.mu.Lock()
 			d.queries[id] = queryReq{
 				SQL:   q.SQL,
 				RefID: query.RefID,
 			}
+			d.mu.Unlock()
 			channel := live.Channel{
 				Scope:     live.ScopeDatasource,
 				Namespace: req.PluginContext.DataSourceInstanceSettings.UID,
@@ -143,7 +147,6 @@ func (d *Datasource) QueryData(ctx context.Context, req *backend.QueryDataReques
 // created. As soon as datasource settings change detected by SDK old datasource instance will
 // be disposed and a new one will be created using NewSampleDatasource factory function.
 func (d *Datasource) Dispose() {
-	// log.DefaultLogger.Info("Dispose")
 	if err := d.engine.Dispose(); err != nil {
 		log.DefaultLogger.Error("failed to dispose", "error", err)
 		return
@@ -152,11 +155,13 @@ func (d *Datasource) Dispose() {
 
 func (d *Datasource) SubscribeStream(ctx context.Context, req *backend.SubscribeStreamRequest) (*backend.SubscribeStreamResponse, error) {
 	var status backend.SubscribeStreamStatus
+	d.mu.RLock()
 	if _, ok := d.queries[req.Path]; ok {
 		status = backend.SubscribeStreamStatusOK
 	} else {
 		status = backend.SubscribeStreamStatusNotFound
 	}
+	d.mu.RUnlock()
 
 	return &backend.SubscribeStreamResponse{
 		Status: status,
@@ -172,8 +177,10 @@ func (d *Datasource) PublishStream(ctx context.Context, _ *backend.PublishStream
 func (d *Datasource) RunStream(ctx context.Context, req *backend.RunStreamRequest, sender *backend.StreamSender) error {
 	logger := log.DefaultLogger.FromContext(ctx)
 
-	path := req.Path
-	queryReq, ok := d.queries[path]
+	d.mu.RLock()
+	queryReq, ok := d.queries[req.Path]
+	d.mu.RUnlock()
+
 	if !ok {
 		return nil
 	}

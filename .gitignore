@@ -1,7 +1,7 @@
 node_modules
 .DS_Store
 *.zip
-
+data
 timeplus-proton-datasource
 
 # Logs
