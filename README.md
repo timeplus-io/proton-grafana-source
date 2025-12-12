@@ -1,4 +1,5 @@
 # Timeplus Grafana Datasource
+
 Grafana data source plugin to connect to Timeplus and visualize streaming or batch queries.
 
 ## Overview / Introduction
@@ -14,6 +15,7 @@ A running Timeplus Proton or Timeplus Enterprise instance with TCP port 8463 (fo
 ## Getting Started
 
 ### Use the pre-built Docker Compose
+
 The [docker-compose.yaml](docker-compose.yaml) in this folder ships a Grafana container, with the proton plugin pre-installed, as well as a data generator.
 
 You start it with `docker compose up` and go to http://localhost:3000 to view the Carsharing dashboard.
@@ -22,7 +24,7 @@ A data source for Timeplus is created automatically.
 
 ### Use your own Grafana deployment
 
-Download the latest version from https://d.timeplus.com/grafana/timeplus-proton-datasource-2.1.3.zip
+Download the latest version from https://d.timeplus.com/grafana/timeplus-proton-datasource-2.1.4.zip
 
 Unzip the file and copy the folder to the Grafana plugin directory, usually `/var/lib/grafana/plugins/`.
 
@@ -32,8 +34,8 @@ For example, on a Linux machine, you can run the following commands:
 cd /var/lib/grafana
 mkdir plugins
 cd plugins
-wget d.timeplus.com/grafana/timeplus-proton-datasource-2.1.3.zip
-unzip timeplus-proton-datasource-2.1.3.zip
+wget d.timeplus.com/grafana/timeplus-proton-datasource-2.1.4.zip
+unzip timeplus-proton-datasource-2.1.4.zip
 /bin/systemctl start grafana-server.service
 ```
 
@@ -43,8 +45,8 @@ For macOS, you can run the following commands:
 cd /opt/homebrew/var/lib/grafana
 mkdir plugins
 cd plugins
-wget d.timeplus.com/grafana/timeplus-proton-datasource-2.1.3.zip
-unzip timeplus-proton-datasource-2.1.3.zip
+wget d.timeplus.com/grafana/timeplus-proton-datasource-2.1.4.zip
+unzip timeplus-proton-datasource-2.1.4.zip
 brew services restart grafana
 ```
 
@@ -59,7 +61,9 @@ There are unbounded streaming query and bounded historical query in Timeplus, al
 ![query editor](src/img/query.png)
 
 ### Query Variables
-You can define dashboard variables with this data source. Please make sure turning off the streaming query mode in the SQL to populate the variable values, and only return 1 or 2 columns. When there is 1 column returned, it will be set as both value and label. If there are 2 columns, the first column will be set as value and the second column as the label.  You can also refer to `__from` and `__to` variables in the SQL to get the time range of the dashboard, e.g.:
+
+You can define dashboard variables with this data source. Please make sure turning off the streaming query mode in the SQL to populate the variable values, and only return 1 or 2 columns. When there is 1 column returned, it will be set as both value and label. If there are 2 columns, the first column will be set as value and the second column as the label. You can also refer to `__from` and `__to` variables in the SQL to get the time range of the dashboard, e.g.:
+
 ```sql
 SELECT distinct product_id FROM table(coinbase)  where _tp_time < to_datetime($__to/1000) and _tp_time > to_datetime($__from/1000)
 ```
@@ -89,6 +93,7 @@ SELECT distinct product_id FROM table(coinbase)  where _tp_time < to_datetime($_
    ```bash
    mage -l
    ```
+
 ### Frontend
 
 1. Install dependencies
@@ -110,12 +115,13 @@ SELECT distinct product_id FROM table(coinbase)  where _tp_time < to_datetime($_
    ```
 
 4. Sign the plugin
+
    ```bash
    export GRAFANA_ACCESS_POLICY_TOKEN=<YOUR_ACCESS_POLICY_TOKEN>
    npm run sign
    ```
 
-4. Distribute the plugin
+5. Distribute the plugin
    ```bash
    make package
    ```

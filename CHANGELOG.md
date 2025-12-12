@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.1.4
+
+Key changes:
+
+* Fixed a concurrent panic issue when running query
+* Bumped proton-go-driver to 2.1.2
+
 ## 2.1.3
 
 Key changes:
