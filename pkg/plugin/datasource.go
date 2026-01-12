@@ -17,8 +17,7 @@ import (
 )
 
 const (
-	batchSize       = 1000
-	batchIntervalMS = 100
+	batchSize = 1000
 )
 
 var (
@@ -45,8 +44,9 @@ func NewDatasource(ctx context.Context, settings backend.DataSourceInstanceSetti
 }
 
 type queryReq struct {
-	SQL   string
-	RefID string
+	SQL      string
+	RefID    string
+	Interval time.Duration
 }
 
 // Datasource is an example datasource which can respond to data queries, reports
@@ -86,8 +86,9 @@ func (d *Datasource) QueryData(ctx context.Context, req *backend.QueryDataReques
 			id := uuid.NewString()
 			d.mu.Lock()
 			d.queries[id] = queryReq{
-				SQL:   q.SQL,
-				RefID: query.RefID,
+				SQL:      q.SQL,
+				RefID:    query.RefID,
+				Interval: query.Interval,
 			}
 			d.mu.Unlock()
 			channel := live.Channel{
@@ -190,7 +191,7 @@ func (d *Datasource) RunStream(ctx context.Context, req *backend.RunStreamReques
 		return err
 	}
 
-	ticker := time.NewTicker(batchIntervalMS * time.Millisecond)
+	ticker := time.NewTicker(queryReq.Interval)
 	var (
 		frame *data.Frame
 		count int
