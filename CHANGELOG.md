@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.1.5
+
+Key changes:
+
+* Respected the query interval setting.
+
 ## 2.1.4
 
 Key changes:
